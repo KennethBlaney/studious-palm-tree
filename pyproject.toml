@@ -1,0 +1,27 @@
+# pyproject.toml
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "basic_role_play"
+version = "0.0.0"
+description = "A base library to contain all of the various needs of a Basic Roleplaying character"
+readme = "README.md"
+authors = [{ name = "Kenneth Blaney", email = "kenneth.r.blaney@gmail.com" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["rpg", "ttrpg", "basic roleplaying", "orc"]
+dependencies = [
+]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
+
+[project.urls]
+Homepage = "https://github.com/KennethBlaney/studious-palm-tree"
