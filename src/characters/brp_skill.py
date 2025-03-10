@@ -25,7 +25,8 @@ class BasicRoleplaySkill():
                    category_bonus: dict = 0,
                    diff_multi: int = 1,
                    modifier: int = 0,
-                   advantage: int = 0) -> Dict:
+                   advantage: int = 0,
+                   lucky: bool = False) -> Dict:
         """
         This rolls the skill and reports a dict of the levels of success
         :param category_bonus: bonus from the calling character's characteristics
@@ -42,6 +43,9 @@ class BasicRoleplaySkill():
             "critical": False
         }
         roll = roll_d100(advantage)
+        if self.chance == 0 and roll == 1:
+            result["failure"], result["success"] = False, True
+            return result
         total = roll + category_bonus.get(self.category, 0) + modifier
         if roll >= 99:
             result["fumble"] = True
