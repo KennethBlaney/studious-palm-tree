@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from json import loads
 
 from .brp_skill import BasicRoleplaySkill
 from ..utils import roll_d100, roll_ndm
@@ -57,7 +56,7 @@ class BasicRoleplayCharacter:
         "Brawl": BasicRoleplaySkill(**{"name": "Brawl", "category": "combat", "chance": 25}),
         "Energy Weapon (various)": BasicRoleplaySkill(
             **{"name": "Energy Weapon (various)", "category": "combat", "chance": 5}),
-        "Firearm (varios)": BasicRoleplaySkill(**{"name": "Firearm (varios)", "category": "combat", "chance": 5}),
+        "Firearm (various)": BasicRoleplaySkill(**{"name": "Firearm (various)", "category": "combat", "chance": 5}),
         "Grapple": BasicRoleplaySkill(**{"name": "Grapple", "category": "combat", "chance": 25}),
         "Heavy Weapon (various)": BasicRoleplaySkill(
             **{"name": "Heavy Weapon (various)", "category": "combat", "chance": 5}),
@@ -238,4 +237,3 @@ def _set_category_bonus(primary: int = 10,
                         secondary2: int = 10,
                         negative: int = 10) -> int:
     return (primary-10) + (secondary1-10)//2 + (secondary2-10)//2 + (10-negative)
-
