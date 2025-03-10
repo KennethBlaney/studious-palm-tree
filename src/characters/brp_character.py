@@ -14,6 +14,7 @@ class BasicRoleplayCharacter:
     tough: bool = False  # use optional total hit points rule
     use_category_bonus: bool = True  # use optional normal category bonus
     use_simple_category_bonus: bool = False  # use optional simple category bonus, will be overridden by category_bonus
+    use_education: bool = True  # use optional education rule
     personality_type: str = ""
     profession: str = ""
     power_level: str = ""
@@ -54,37 +55,50 @@ class BasicRoleplayCharacter:
         # Combat Skills
         "Artillery (various)": BasicRoleplaySkill(**{"name": "Artillery (various)", "category": "combat", "chance": 5}),
         "Brawl": BasicRoleplaySkill(**{"name": "Brawl", "category": "combat", "chance": 25}),
-        "Energy Weapon (various)": BasicRoleplaySkill(**{"name": "Energy Weapon (various)", "category": "combat", "chance": 5}),
+        "Energy Weapon (various)": BasicRoleplaySkill(
+            **{"name": "Energy Weapon (various)", "category": "combat", "chance": 5}),
         "Firearm (varios)": BasicRoleplaySkill(**{"name": "Firearm (varios)", "category": "combat", "chance": 5}),
         "Grapple": BasicRoleplaySkill(**{"name": "Grapple", "category": "combat", "chance": 25}),
-        "Heavy Weapon (various)": BasicRoleplaySkill(**{"name": "Heavy Weapon (various)", "category": "combat", "chance": 5}),
+        "Heavy Weapon (various)": BasicRoleplaySkill(
+            **{"name": "Heavy Weapon (various)", "category": "combat", "chance": 5}),
         "Martial Arts": BasicRoleplaySkill(**{"name": "Martial Arts", "category": "combat", "chance": 1}),
-        "Melee Weapon (various)": BasicRoleplaySkill(**{"name": "Melee Weapon (various)", "category": "combat", "chance": 5}),
-        "Missile Weapon (various)": BasicRoleplaySkill(**{"name": "Missile Weapon (various)", "category": "combat", "chance": 5}),
+        "Melee Weapon (various)": BasicRoleplaySkill(
+            **{"name": "Melee Weapon (various)", "category": "combat", "chance": 5}),
+        "Missile Weapon (various)": BasicRoleplaySkill(
+            **{"name": "Missile Weapon (various)", "category": "combat", "chance": 5}),
         "Parry (various)": BasicRoleplaySkill(**{"name": "Parry (various)", "category": "combat", "chance": 5}),
         "Shield": BasicRoleplaySkill(**{"name": "Shield", "category": "combat", "chance": 5}),
         # Communication Skills
         "Bargain": BasicRoleplaySkill(**{"name": "Bargain", "category": "communication", "chance": 5}),
         "Command": BasicRoleplaySkill(**{"name": "Command", "category": "communication", "chance": 5}),
         "Disguise": BasicRoleplaySkill(**{"name": "Disguise", "category": "communication", "chance": 1}),
-        "Etiquette (various)": BasicRoleplaySkill(**{"name": "Etiquette (various)", "category": "communication", "chance": 5}),
+        "Etiquette (various)": BasicRoleplaySkill(
+            **{"name": "Etiquette (various)", "category": "communication", "chance": 5}),
         "Fast Talk": BasicRoleplaySkill(**{"name": "Fast Talk", "category": "communication", "chance": 5}),
-        "Language (various)": BasicRoleplaySkill(**{"name": "Language (own)", "category": "communication", "chance": 0}),
+        "Language (various)": BasicRoleplaySkill(
+            **{"name": "Language (own)", "category": "communication", "chance": 0}),
         "Perform": BasicRoleplaySkill(**{"name": "Perform", "category": "communication", "chance": 5}),
         "Persuade": BasicRoleplaySkill(**{"name": "Persuade", "category": "communication", "chance": 15}),
-        "Status": BasicRoleplaySkill(**{"name": "Status", "category": "communication", "chance": 15, "can_be_improved_through_experience": False}),
+        "Status": BasicRoleplaySkill(
+            **{"name": "Status", "category": "communication", "chance": 15,
+               "can_be_improved_through_experience": False}),
         "Teach": BasicRoleplaySkill(**{"name": "Teach", "category": "communication", "chance": 10}),
         # Manipulation Skills
         "Art (various)": BasicRoleplaySkill(**{"name": "Art (various)", "category": "manipulation", "chance": 5}),
         "Craft (various)": BasicRoleplaySkill(**{"name": "Craft (various)", "category": "manipulation", "chance": 5}),
         "Demolition": BasicRoleplaySkill(**{"name": "Demolition", "category": "manipulation", "chance": 1}),
-        "Fine Manipulation": BasicRoleplaySkill(**{"name": "Fine Manipulation", "category": "manipulation", "chance": 5}),
-        "Heavy Machine (various)": BasicRoleplaySkill(**{"name": "Heavy Machine (various)", "category": "manipulation", "chance": 1}),
-        "Repair (various)": BasicRoleplaySkill(**{"name": "Repair (various)", "category": "manipulation", "chance": 15}),
+        "Fine Manipulation": BasicRoleplaySkill(
+            **{"name": "Fine Manipulation", "category": "manipulation", "chance": 5}),
+        "Heavy Machine (various)": BasicRoleplaySkill(
+            **{"name": "Heavy Machine (various)", "category": "manipulation", "chance": 1}),
+        "Repair (various)": BasicRoleplaySkill(
+            **{"name": "Repair (various)", "category": "manipulation", "chance": 15}),
         "Sleight of Hand": BasicRoleplaySkill(**{"name": "Sleight of Hand", "category": "manipulation", "chance": 5}),
         # Mental Skills
         "Appraise": BasicRoleplaySkill(**{"name": "Appraise", "category": "mental", "chance": 15}),
-        "Blasphemous Lore": BasicRoleplaySkill(**{"name": "Blasphemous Lore", "category": "mental", "chance": 0, "can_be_improved_through_experience": False}),
+        "Blasphemous Lore": BasicRoleplaySkill(
+            **{"name": "Blasphemous Lore", "category": "mental", "chance": 0,
+               "can_be_improved_through_experience": False}),
         "First Aid": BasicRoleplaySkill(**{"name": "First Aid", "category": "mental", "chance": 30}),
         "Gaming": BasicRoleplaySkill(**{"name": "Gaming", "category": "mental", "chance": 0}),
         "Knowledge (various)": BasicRoleplaySkill(**{"name": "Knowledge (various)", "category": "mental", "chance": 5}),
@@ -93,7 +107,8 @@ class BasicRoleplayCharacter:
         "Psychotherapy": BasicRoleplaySkill(**{"name": "Psychotherapy", "category": "mental", "chance": 1}),
         "Science (various)": BasicRoleplaySkill(**{"name": "Science (various)", "category": "mental", "chance": 1}),
         "Strategy": BasicRoleplaySkill(**{"name": "Strategy", "category": "mental", "chance": 1}),
-        "Technical Skill (various)": BasicRoleplaySkill(**{"name": "Technical Skill (various)", "category": "mental", "chance": 5}),
+        "Technical Skill (various)": BasicRoleplaySkill(
+            **{"name": "Technical Skill (various)", "category": "mental", "chance": 5}),
         # Perception Skills
         "Insight": BasicRoleplaySkill(**{"name": "Insight", "category": "perception", "chance": 5}),
         "Listen": BasicRoleplaySkill(**{"name": "Listen", "category": "perception", "chance": 25}),
@@ -181,12 +196,19 @@ class BasicRoleplayCharacter:
 
     def _set_default_skills(self):
         # skills that depend on attributes
-        self.skill_defaults[f"Language ({self.primary_language}"] = BasicRoleplaySkill(**{"name": "Language (own)", "category": "communication", "chance": 5*max(self.INT, self.EDU)})
-        if self.literate:
-            self.skill_defaults["Literacy"].chance = self.skill_defaults[f"Language ({self.primary_language}"].chance
-        self.skill_defaults["Gaming"] = BasicRoleplaySkill(**{"name": "Language (own)", "category": "communication", "chance": self.INT + self.POW})
+        self.skill_defaults["Dodge"].chance = 2 * self.DEX
         if self.can_drive:
             self.skill_defaults["Drive (various)"].chance = 20
+        if not self.use_education:
+            self.skill_defaults[f"Language ({self.primary_language}"] = BasicRoleplaySkill(
+                **{"name": "Language (own)", "category": "communication", "chance": 5 * self.INT})
+        else:
+            self.skill_defaults[f"Language ({self.primary_language}"] = BasicRoleplaySkill(
+                **{"name": "Language (own)", "category": "communication", "chance": 5 * max(self.INT, self.EDU)})
+        if self.literate:
+            self.skill_defaults["Literacy"].chance = self.skill_defaults[f"Language ({self.primary_language}"].chance
+        self.skill_defaults["Gaming"] = BasicRoleplaySkill(
+            **{"name": "Language (own)", "category": "communication", "chance": self.INT + self.POW})
         if self.can_fly:
             self.skill_defaults["Fly"].chance = 4 * self.DEX
         else:
