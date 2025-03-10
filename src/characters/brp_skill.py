@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from ..utils import roll_d100, roll_ndm
 
 @dataclass
-class BasicRoleplaySkill:
+class BasicRoleplaySkill():
     name: str = ""
     category: str = ""
     chance: int = 0
@@ -22,7 +22,7 @@ class BasicRoleplaySkill:
         self.chance += amount
 
     def skill_roll(self,
-                   category_bonus: int = 0,
+                   category_bonus: dict = 0,
                    diff_multi: int = 1,
                    modifier: int = 0,
                    advantage: int = 0) -> Dict:
@@ -42,12 +42,13 @@ class BasicRoleplaySkill:
             "critical": False
         }
         roll = roll_d100(advantage)
+        total = roll + category_bonus.get(self.category, 0) + modifier
         if roll >= 99:
             result["fumble"] = True
-        elif roll+category_bonus+modifier <= diff_multi * self.chance:
+        elif total <= diff_multi * self.chance:
             result["failure"], result["success"] = False, True
-            if roll+category_bonus+modifier <= -((diff_multi * self.chance)//-5):
+            if total <= -((diff_multi * self.chance)//-5):
                 result["special"] = True
-                if roll+category_bonus+modifier <= -((diff_multi * self.chance)//-20):
+                if total <= -((diff_multi * self.chance)//-20):
                     result["critical"] = True
         return result
