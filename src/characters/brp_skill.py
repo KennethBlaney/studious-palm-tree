@@ -29,6 +29,7 @@ class BasicRoleplaySkill():
                    lucky: bool = False) -> Dict:
         """
         This rolls the skill and reports a dict of the levels of success
+        :param lucky: allows a 1% chance of success on a skill with 0 chance
         :param category_bonus: bonus from the calling character's characteristics
         :param diff_multi: easy checks should double the skill, difficult or fatigued checks should half it
         :param modifier: a situational modifier for the skill roll, adds to chance of success
@@ -43,7 +44,7 @@ class BasicRoleplaySkill():
             "critical": False
         }
         roll = roll_d100(advantage)
-        if self.chance == 0 and roll == 1:
+        if self.chance == 0 and roll == 1 and lucky:
             result["failure"], result["success"] = False, True
             return result
         total = roll + category_bonus.get(self.category, 0) + modifier
@@ -51,6 +52,7 @@ class BasicRoleplaySkill():
             result["fumble"] = True
         elif total <= diff_multi * self.chance:
             result["failure"], result["success"] = False, True
+            self.experience_check = True
             if total <= -((diff_multi * self.chance)//-5):
                 result["special"] = True
                 if total <= -((diff_multi * self.chance)//-20):
