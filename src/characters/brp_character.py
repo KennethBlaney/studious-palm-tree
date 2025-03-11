@@ -4,53 +4,7 @@ from .brp_skill import BasicRoleplaySkill
 from ..utils import roll_d100, roll_ndm
 
 
-@dataclass
-class BasicRoleplayCharacter:
-    # biographical information
-    name: str = ""
-    gender: str = ""
-    age: int = 0
-    tough: bool = False  # use optional total hit points rule
-    use_category_bonus: bool = True  # use optional normal category bonus
-    use_simple_category_bonus: bool = False  # use optional simple category bonus, will be overridden by category_bonus
-    use_education: bool = True  # use optional education rule
-    personality_type: str = ""
-    profession: str = ""
-    power_level: str = ""
-    primary_language: str = ""
-    literate: bool = True
-    can_drive: bool = True
-    can_fly: bool = True
-    energy_projection: bool = False
-
-    # equipment
-    wealth: str = ""
-
-    # characteristics
-    STR: int = 10
-    CON: int = 10
-    POW: int = 10
-    DEX: int = 10
-    CHA: int = 10
-    INT: int = 10
-    SIZ: int = 10
-    EDU: int = 10
-    MOV: int = 10
-    max_species_pow = 18
-    min_species_pow = 3
-    pow_improvement_check = False
-
-    # powers
-    magic: bool = False
-    mutation: bool = False
-    psychic: bool = False
-    sorcery: bool = False
-    superpower: bool = False
-
-    # skills
-    skills: dict = field(default_factory=lambda: {})  # used for skills that this character had increased from defaults
-    new_skill_defaults: dict = field(default_factory=lambda: {})  # used to add new skills unique to the setting
-    skill_defaults: dict = field(default_factory=lambda: {
+skill_defaults: dict = {
         # Combat Skills
         "Artillery (various)": BasicRoleplaySkill(**{"name": "Artillery (various)", "category": "combat", "chance": 5}),
         "Brawl": BasicRoleplaySkill(**{"name": "Brawl", "category": "combat", "chance": 25}),
@@ -129,7 +83,54 @@ class BasicRoleplayCharacter:
         "Stealth": BasicRoleplaySkill(**{"name": "Stealth", "category": "physical", "chance": 10}),
         "Swim": BasicRoleplaySkill(**{"name": "Swim", "category": "physical", "chance": 25}),
         "Throw": BasicRoleplaySkill(**{"name": "Throw", "category": "physical", "chance": 25})
-    })
+    }
+
+@dataclass
+class BasicRoleplayCharacter:
+    # biographical information
+    name: str = ""
+    gender: str = ""
+    age: int = 0
+    tough: bool = False  # use optional total hit points rule
+    use_category_bonus: bool = True  # use optional normal category bonus
+    use_simple_category_bonus: bool = False  # use optional simple category bonus, will be overridden by category_bonus
+    use_education: bool = True  # use optional education rule
+    personality_type: str = ""
+    profession: str = ""
+    power_level: str = ""
+    primary_language: str = ""
+    literate: bool = True
+    can_drive: bool = True
+    can_fly: bool = True
+    energy_projection: bool = False
+
+    # equipment
+    wealth: str = ""
+
+    # characteristics
+    STR: int = 10
+    CON: int = 10
+    POW: int = 10
+    DEX: int = 10
+    CHA: int = 10
+    INT: int = 10
+    SIZ: int = 10
+    EDU: int = 10
+    MOV: int = 10
+    max_species_pow = 18
+    min_species_pow = 3
+    pow_improvement_check = False
+
+    # powers
+    magic: bool = False
+    mutation: bool = False
+    psychic: bool = False
+    sorcery: bool = False
+    superpower: bool = False
+
+    # skills
+    skills: dict = field(default_factory=lambda: {})  # used for skills that this character had increased from defaults
+    new_skill_defaults: dict = field(default_factory=lambda: {})  # used to add new skills unique to the setting
 
     # health
     damage: int = 0
@@ -145,6 +146,7 @@ class BasicRoleplayCharacter:
 
     def __post_init__(self):
         self._derived_characteristics()
+        self._objectify_skills()
         self._set_default_skills()
         if self.use_category_bonus or self.use_simple_category_bonus:
             self._set_category_bonuses()
@@ -195,33 +197,33 @@ class BasicRoleplayCharacter:
 
     def _set_default_skills(self):
         # skills that depend on attributes
-        self.skill_defaults["Dodge"].chance = 2 * self.DEX
+        skill_defaults["Dodge"].chance = 2 * self.DEX
         if self.can_drive:
-            self.skill_defaults["Drive (various)"].chance = 20
+            skill_defaults["Drive (various)"].chance = 20
         if not self.use_education:
-            self.skill_defaults[f"Language ({self.primary_language}"] = BasicRoleplaySkill(
+            skill_defaults[f"Language ({self.primary_language}"] = BasicRoleplaySkill(
                 **{"name": "Language (own)", "category": "communication", "chance": 5 * self.INT})
         else:
-            self.skill_defaults[f"Language ({self.primary_language}"] = BasicRoleplaySkill(
+            skill_defaults[f"Language ({self.primary_language}"] = BasicRoleplaySkill(
                 **{"name": "Language (own)", "category": "communication", "chance": 5 * max(self.INT, self.EDU)})
         if self.literate:
-            self.skill_defaults["Literacy"].chance = self.skill_defaults[f"Language ({self.primary_language}"].chance
-        self.skill_defaults["Gaming"] = BasicRoleplaySkill(
+            skill_defaults["Literacy"].chance = skill_defaults[f"Language ({self.primary_language}"].chance
+        skill_defaults["Gaming"] = BasicRoleplaySkill(
             **{"name": "Language (own)", "category": "communication", "chance": self.INT + self.POW})
         if self.can_fly:
-            self.skill_defaults["Fly"].chance = 4 * self.DEX
+            skill_defaults["Fly"].chance = 4 * self.DEX
         else:
-            self.skill_defaults["Fly"].chance = .5 * self.DEX
+            skill_defaults["Fly"].chance = .5 * self.DEX
         if self.energy_projection:
-            self.skill_defaults["Projection"].chance = 2 * self.DEX
+            skill_defaults["Projection"].chance = 2 * self.DEX
 
         # incorporate passed in skills
-        self.skill_defaults.update(self.new_skill_defaults)
+        skill_defaults.update(self.new_skill_defaults)
 
         # set defaults for undefined skills for the character
-        for key in self.skill_defaults:
+        for key in skill_defaults:
             if key not in self.skills:
-                self.skills[key] = self.skill_defaults[key]
+                self.skills[key] = skill_defaults[key]
 
     def _set_category_bonuses(self):
         self.category_bonuses = {"combat": _set_category_bonus(self.DEX, self.INT, self.STR),
@@ -230,6 +232,12 @@ class BasicRoleplayCharacter:
                                  "mental": _set_category_bonus(self.INT, self.POW, self.EDU),
                                  "perception": _set_category_bonus(self.INT, self.POW, self.CON),
                                  "physical": _set_category_bonus(self.DEX, self.STR, self.CON, self.SIZ)}
+
+    def _objectify_skills(self):
+        for key, value in self.new_skill_defaults.items():
+            self.new_skill_defaults[key] = BasicRoleplaySkill(**value)
+        for key, value in self.skills.items():
+            self.skills[key] = BasicRoleplaySkill(**value)
 
 
 def _set_category_bonus(primary: int = 10,
