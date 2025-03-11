@@ -3,8 +3,9 @@ from dataclasses import dataclass
 
 from ..utils import roll_d100, roll_ndm
 
+
 @dataclass
-class BasicRoleplaySkill():
+class BasicRoleplaySkill:
     name: str = ""
     category: str = ""
     chance: int = 0
@@ -12,6 +13,12 @@ class BasicRoleplaySkill():
     can_be_improved_through_experience: bool = True  # only false for Blasphemous Knowledge
 
     def experience_roll(self, int_characteristic: int = 10, improvement_dice: int = 6):
+        """
+        Rolls an experience check for this skill.
+        :param int_characteristic: bonus for character's learning based on their int
+        :param improvement_dice: the size of the improvement die to roll, generally 6
+        :return: None, acts on self
+        """
         if self.experience_check:
             improve_check = roll_d100() + -(int_characteristic//-2)
             if improve_check >= min(self.chance, 100):
@@ -29,25 +36,28 @@ class BasicRoleplaySkill():
                    lucky: bool = False) -> Dict:
         """
         This rolls the skill and reports a dict of the levels of success
-        :param lucky: allows a 1% chance of success on a skill with 0 chance
         :param category_bonus: bonus from the calling character's characteristics
         :param diff_multi: easy checks should double the skill, difficult or fatigued checks should half it
         :param modifier: a situational modifier for the skill roll, adds to chance of success
         :param advantage: positive values indicate additional rolls to take lowest, negative values indicate additional rolls to take highest
+        :param lucky: allows a 1% chance of success on a skill with 0 chance
         :return: dict of possible success states
         """
+
+        roll = roll_d100(advantage)
+        total = roll + category_bonus.get(self.category, 0) + modifier
         result = {
             "fumble": False,
             "failure": True,
             "success": False,
             "special": False,
-            "critical": False
+            "critical": False,
+            "roll": roll,
+            "total": total
         }
-        roll = roll_d100(advantage)
         if self.chance == 0 and roll == 1 and lucky:
             result["failure"], result["success"] = False, True
             return result
-        total = roll + category_bonus.get(self.category, 0) + modifier
         if roll >= 99:
             result["fumble"] = True
         elif total <= diff_multi * self.chance:

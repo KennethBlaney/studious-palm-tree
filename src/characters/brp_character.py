@@ -1,89 +1,90 @@
+from typing import Union, Dict
 from dataclasses import dataclass, field
 
 from .brp_skill import BasicRoleplaySkill
 from ..utils import roll_d100, roll_ndm
 
-
 skill_defaults: dict = {
-        # Combat Skills
-        "Artillery (various)": BasicRoleplaySkill(**{"name": "Artillery (various)", "category": "combat", "chance": 5}),
-        "Brawl": BasicRoleplaySkill(**{"name": "Brawl", "category": "combat", "chance": 25}),
-        "Energy Weapon (various)": BasicRoleplaySkill(
-            **{"name": "Energy Weapon (various)", "category": "combat", "chance": 5}),
-        "Firearm (various)": BasicRoleplaySkill(**{"name": "Firearm (various)", "category": "combat", "chance": 5}),
-        "Grapple": BasicRoleplaySkill(**{"name": "Grapple", "category": "combat", "chance": 25}),
-        "Heavy Weapon (various)": BasicRoleplaySkill(
-            **{"name": "Heavy Weapon (various)", "category": "combat", "chance": 5}),
-        "Martial Arts": BasicRoleplaySkill(**{"name": "Martial Arts", "category": "combat", "chance": 1}),
-        "Melee Weapon (various)": BasicRoleplaySkill(
-            **{"name": "Melee Weapon (various)", "category": "combat", "chance": 5}),
-        "Missile Weapon (various)": BasicRoleplaySkill(
-            **{"name": "Missile Weapon (various)", "category": "combat", "chance": 5}),
-        "Parry (various)": BasicRoleplaySkill(**{"name": "Parry (various)", "category": "combat", "chance": 5}),
-        "Shield": BasicRoleplaySkill(**{"name": "Shield", "category": "combat", "chance": 5}),
-        # Communication Skills
-        "Bargain": BasicRoleplaySkill(**{"name": "Bargain", "category": "communication", "chance": 5}),
-        "Command": BasicRoleplaySkill(**{"name": "Command", "category": "communication", "chance": 5}),
-        "Disguise": BasicRoleplaySkill(**{"name": "Disguise", "category": "communication", "chance": 1}),
-        "Etiquette (various)": BasicRoleplaySkill(
-            **{"name": "Etiquette (various)", "category": "communication", "chance": 5}),
-        "Fast Talk": BasicRoleplaySkill(**{"name": "Fast Talk", "category": "communication", "chance": 5}),
-        "Language (various)": BasicRoleplaySkill(
-            **{"name": "Language (own)", "category": "communication", "chance": 0}),
-        "Perform": BasicRoleplaySkill(**{"name": "Perform", "category": "communication", "chance": 5}),
-        "Persuade": BasicRoleplaySkill(**{"name": "Persuade", "category": "communication", "chance": 15}),
-        "Status": BasicRoleplaySkill(
-            **{"name": "Status", "category": "communication", "chance": 15,
-               "can_be_improved_through_experience": False}),
-        "Teach": BasicRoleplaySkill(**{"name": "Teach", "category": "communication", "chance": 10}),
-        # Manipulation Skills
-        "Art (various)": BasicRoleplaySkill(**{"name": "Art (various)", "category": "manipulation", "chance": 5}),
-        "Craft (various)": BasicRoleplaySkill(**{"name": "Craft (various)", "category": "manipulation", "chance": 5}),
-        "Demolition": BasicRoleplaySkill(**{"name": "Demolition", "category": "manipulation", "chance": 1}),
-        "Fine Manipulation": BasicRoleplaySkill(
-            **{"name": "Fine Manipulation", "category": "manipulation", "chance": 5}),
-        "Heavy Machine (various)": BasicRoleplaySkill(
-            **{"name": "Heavy Machine (various)", "category": "manipulation", "chance": 1}),
-        "Repair (various)": BasicRoleplaySkill(
-            **{"name": "Repair (various)", "category": "manipulation", "chance": 15}),
-        "Sleight of Hand": BasicRoleplaySkill(**{"name": "Sleight of Hand", "category": "manipulation", "chance": 5}),
-        # Mental Skills
-        "Appraise": BasicRoleplaySkill(**{"name": "Appraise", "category": "mental", "chance": 15}),
-        "Blasphemous Lore": BasicRoleplaySkill(
-            **{"name": "Blasphemous Lore", "category": "mental", "chance": 0,
-               "can_be_improved_through_experience": False}),
-        "First Aid": BasicRoleplaySkill(**{"name": "First Aid", "category": "mental", "chance": 30}),
-        "Gaming": BasicRoleplaySkill(**{"name": "Gaming", "category": "mental", "chance": 0}),
-        "Knowledge (various)": BasicRoleplaySkill(**{"name": "Knowledge (various)", "category": "mental", "chance": 5}),
-        "Literacy": BasicRoleplaySkill(**{"name": "Literacy", "category": "mental", "chance": 0}),
-        "Medicine": BasicRoleplaySkill(**{"name": "Medicine", "category": "mental", "chance": 5}),
-        "Psychotherapy": BasicRoleplaySkill(**{"name": "Psychotherapy", "category": "mental", "chance": 1}),
-        "Science (various)": BasicRoleplaySkill(**{"name": "Science (various)", "category": "mental", "chance": 1}),
-        "Strategy": BasicRoleplaySkill(**{"name": "Strategy", "category": "mental", "chance": 1}),
-        "Technical Skill (various)": BasicRoleplaySkill(
-            **{"name": "Technical Skill (various)", "category": "mental", "chance": 5}),
-        # Perception Skills
-        "Insight": BasicRoleplaySkill(**{"name": "Insight", "category": "perception", "chance": 5}),
-        "Listen": BasicRoleplaySkill(**{"name": "Listen", "category": "perception", "chance": 25}),
-        "Navigate": BasicRoleplaySkill(**{"name": "Navigate", "category": "perception", "chance": 10}),
-        "Research": BasicRoleplaySkill(**{"name": "Research", "category": "perception", "chance": 25}),
-        "Sense": BasicRoleplaySkill(**{"name": "Sense", "category": "perception", "chance": 10}),
-        "Spot": BasicRoleplaySkill(**{"name": "Spot", "category": "perception", "chance": 25}),
-        "Track": BasicRoleplaySkill(**{"name": "Track", "category": "perception", "chance": 10}),
-        # Physical Skills
-        "Climb": BasicRoleplaySkill(**{"name": "Climb", "category": "physical", "chance": 40}),
-        "Dodge": BasicRoleplaySkill(**{"name": "Dodge", "category": "physical", "chance": 0}),
-        "Drive (various)": BasicRoleplaySkill(**{"name": "Drive (various)", "category": "physical", "chance": 0}),
-        "Fly": BasicRoleplaySkill(**{"name": "Fly", "category": "physical", "chance": 0}),
-        "Hide": BasicRoleplaySkill(**{"name": "Hide", "category": "physical", "chance": 10}),
-        "Jump": BasicRoleplaySkill(**{"name": "Jump", "category": "physical", "chance": 25}),
-        "Pilot (various)": BasicRoleplaySkill(**{"name": "Pilot (various)", "category": "physical", "chance": 1}),
-        "Projection": BasicRoleplaySkill(**{"name": "Projection", "category": "physical", "chance": 0}),
-        "Ride (various)": BasicRoleplaySkill(**{"name": "Ride (various)", "category": "physical", "chance": 5}),
-        "Stealth": BasicRoleplaySkill(**{"name": "Stealth", "category": "physical", "chance": 10}),
-        "Swim": BasicRoleplaySkill(**{"name": "Swim", "category": "physical", "chance": 25}),
-        "Throw": BasicRoleplaySkill(**{"name": "Throw", "category": "physical", "chance": 25})
-    }
+    # Combat Skills
+    "Artillery (various)": BasicRoleplaySkill(**{"name": "Artillery (various)", "category": "combat", "chance": 5}),
+    "Brawl": BasicRoleplaySkill(**{"name": "Brawl", "category": "combat", "chance": 25}),
+    "Energy Weapon (various)": BasicRoleplaySkill(
+        **{"name": "Energy Weapon (various)", "category": "combat", "chance": 5}),
+    "Firearm (various)": BasicRoleplaySkill(**{"name": "Firearm (various)", "category": "combat", "chance": 5}),
+    "Grapple": BasicRoleplaySkill(**{"name": "Grapple", "category": "combat", "chance": 25}),
+    "Heavy Weapon (various)": BasicRoleplaySkill(
+        **{"name": "Heavy Weapon (various)", "category": "combat", "chance": 5}),
+    "Martial Arts": BasicRoleplaySkill(**{"name": "Martial Arts", "category": "combat", "chance": 1}),
+    "Melee Weapon (various)": BasicRoleplaySkill(
+        **{"name": "Melee Weapon (various)", "category": "combat", "chance": 5}),
+    "Missile Weapon (various)": BasicRoleplaySkill(
+        **{"name": "Missile Weapon (various)", "category": "combat", "chance": 5}),
+    "Parry (various)": BasicRoleplaySkill(**{"name": "Parry (various)", "category": "combat", "chance": 5}),
+    "Shield": BasicRoleplaySkill(**{"name": "Shield", "category": "combat", "chance": 5}),
+    # Communication Skills
+    "Bargain": BasicRoleplaySkill(**{"name": "Bargain", "category": "communication", "chance": 5}),
+    "Command": BasicRoleplaySkill(**{"name": "Command", "category": "communication", "chance": 5}),
+    "Disguise": BasicRoleplaySkill(**{"name": "Disguise", "category": "communication", "chance": 1}),
+    "Etiquette (various)": BasicRoleplaySkill(
+        **{"name": "Etiquette (various)", "category": "communication", "chance": 5}),
+    "Fast Talk": BasicRoleplaySkill(**{"name": "Fast Talk", "category": "communication", "chance": 5}),
+    "Language (various)": BasicRoleplaySkill(
+        **{"name": "Language (own)", "category": "communication", "chance": 0}),
+    "Perform": BasicRoleplaySkill(**{"name": "Perform", "category": "communication", "chance": 5}),
+    "Persuade": BasicRoleplaySkill(**{"name": "Persuade", "category": "communication", "chance": 15}),
+    "Status": BasicRoleplaySkill(
+        **{"name": "Status", "category": "communication", "chance": 15,
+           "can_be_improved_through_experience": False}),
+    "Teach": BasicRoleplaySkill(**{"name": "Teach", "category": "communication", "chance": 10}),
+    # Manipulation Skills
+    "Art (various)": BasicRoleplaySkill(**{"name": "Art (various)", "category": "manipulation", "chance": 5}),
+    "Craft (various)": BasicRoleplaySkill(**{"name": "Craft (various)", "category": "manipulation", "chance": 5}),
+    "Demolition": BasicRoleplaySkill(**{"name": "Demolition", "category": "manipulation", "chance": 1}),
+    "Fine Manipulation": BasicRoleplaySkill(
+        **{"name": "Fine Manipulation", "category": "manipulation", "chance": 5}),
+    "Heavy Machine (various)": BasicRoleplaySkill(
+        **{"name": "Heavy Machine (various)", "category": "manipulation", "chance": 1}),
+    "Repair (various)": BasicRoleplaySkill(
+        **{"name": "Repair (various)", "category": "manipulation", "chance": 15}),
+    "Sleight of Hand": BasicRoleplaySkill(**{"name": "Sleight of Hand", "category": "manipulation", "chance": 5}),
+    # Mental Skills
+    "Appraise": BasicRoleplaySkill(**{"name": "Appraise", "category": "mental", "chance": 15}),
+    "Blasphemous Lore": BasicRoleplaySkill(
+        **{"name": "Blasphemous Lore", "category": "mental", "chance": 0,
+           "can_be_improved_through_experience": False}),
+    "First Aid": BasicRoleplaySkill(**{"name": "First Aid", "category": "mental", "chance": 30}),
+    "Gaming": BasicRoleplaySkill(**{"name": "Gaming", "category": "mental", "chance": 0}),
+    "Knowledge (various)": BasicRoleplaySkill(**{"name": "Knowledge (various)", "category": "mental", "chance": 5}),
+    "Literacy": BasicRoleplaySkill(**{"name": "Literacy", "category": "mental", "chance": 0}),
+    "Medicine": BasicRoleplaySkill(**{"name": "Medicine", "category": "mental", "chance": 5}),
+    "Psychotherapy": BasicRoleplaySkill(**{"name": "Psychotherapy", "category": "mental", "chance": 1}),
+    "Science (various)": BasicRoleplaySkill(**{"name": "Science (various)", "category": "mental", "chance": 1}),
+    "Strategy": BasicRoleplaySkill(**{"name": "Strategy", "category": "mental", "chance": 1}),
+    "Technical Skill (various)": BasicRoleplaySkill(
+        **{"name": "Technical Skill (various)", "category": "mental", "chance": 5}),
+    # Perception Skills
+    "Insight": BasicRoleplaySkill(**{"name": "Insight", "category": "perception", "chance": 5}),
+    "Listen": BasicRoleplaySkill(**{"name": "Listen", "category": "perception", "chance": 25}),
+    "Navigate": BasicRoleplaySkill(**{"name": "Navigate", "category": "perception", "chance": 10}),
+    "Research": BasicRoleplaySkill(**{"name": "Research", "category": "perception", "chance": 25}),
+    "Sense": BasicRoleplaySkill(**{"name": "Sense", "category": "perception", "chance": 10}),
+    "Spot": BasicRoleplaySkill(**{"name": "Spot", "category": "perception", "chance": 25}),
+    "Track": BasicRoleplaySkill(**{"name": "Track", "category": "perception", "chance": 10}),
+    # Physical Skills
+    "Climb": BasicRoleplaySkill(**{"name": "Climb", "category": "physical", "chance": 40}),
+    "Dodge": BasicRoleplaySkill(**{"name": "Dodge", "category": "physical", "chance": 0}),
+    "Drive (various)": BasicRoleplaySkill(**{"name": "Drive (various)", "category": "physical", "chance": 0}),
+    "Fly": BasicRoleplaySkill(**{"name": "Fly", "category": "physical", "chance": 0}),
+    "Hide": BasicRoleplaySkill(**{"name": "Hide", "category": "physical", "chance": 10}),
+    "Jump": BasicRoleplaySkill(**{"name": "Jump", "category": "physical", "chance": 25}),
+    "Pilot (various)": BasicRoleplaySkill(**{"name": "Pilot (various)", "category": "physical", "chance": 1}),
+    "Projection": BasicRoleplaySkill(**{"name": "Projection", "category": "physical", "chance": 0}),
+    "Ride (various)": BasicRoleplaySkill(**{"name": "Ride (various)", "category": "physical", "chance": 5}),
+    "Stealth": BasicRoleplaySkill(**{"name": "Stealth", "category": "physical", "chance": 10}),
+    "Swim": BasicRoleplaySkill(**{"name": "Swim", "category": "physical", "chance": 25}),
+    "Throw": BasicRoleplaySkill(**{"name": "Throw", "category": "physical", "chance": 25})
+}
+
 
 @dataclass
 class BasicRoleplayCharacter:
@@ -98,6 +99,7 @@ class BasicRoleplayCharacter:
     personality_type: str = ""
     profession: str = ""
     power_level: str = ""
+    improvement_die: int = 6
     primary_language: str = ""
     literate: bool = True
     can_drive: bool = True
@@ -153,9 +155,9 @@ class BasicRoleplayCharacter:
 
     def improve_pow(self):
         if self.pow_improvement_check:
-            target = 5*(self.max_species_pow+self.min_species_pow-self.POW)
+            target = 5 * (self.max_species_pow + self.min_species_pow - self.POW)
             if roll_d100() < target:
-                self.POW += roll_ndm(1, 3)-1
+                self.POW += roll_ndm(1, 3) - 1
 
     def _derived_characteristics(self):
         self.damage_modifier = self._calc_damage_modifier()
@@ -170,7 +172,7 @@ class BasicRoleplayCharacter:
             "head": -(self.max_hit_points // -3),
             "left_arm": -(self.max_hit_points // -4),
             "right_arm": -(self.max_hit_points // -4),
-            "chest": -(self.max_hit_points // -(10/4))
+            "chest": -(self.max_hit_points // -(10 / 4))
         }
         self.fatigue = self.STR + self.CON
         self.sanity = min(5 * self.POW, 100)
@@ -188,12 +190,12 @@ class BasicRoleplayCharacter:
         elif s <= 40:
             return "1d6"
         else:
-            return f"{(s-41)//16+2}d6"
+            return f"{(s - 41) // 16 + 2}d6"
 
     def _calc_hit_points(self) -> int:
         if self.tough:
             return self.CON + self.SIZ
-        return -((self.CON + self.SIZ)//-2)
+        return -((self.CON + self.SIZ) // -2)
 
     def _set_default_skills(self):
         # skills that depend on attributes
@@ -239,9 +241,131 @@ class BasicRoleplayCharacter:
         for key, value in self.skills.items():
             self.skills[key] = BasicRoleplaySkill(**value)
 
+    def opposed_roll_highest_success(self,
+                                     opponent: Union[BasicRoleplaySkill, int] = 0,
+                                     opponent_category_bonus: Dict[str, int] = None,
+                                     my_skill: str = "",
+                                     i_win_ties: bool = None) -> Dict[str, bool]:
+        """
+        Uses the highest success method to resolve a skill roll. Also, useful for combat.
+        :param opponent: A skill from an opponent's character class or a static chance
+        :param opponent_category_bonus: opponent's category bonus dict
+        :param my_skill: The skill this character is using
+        :param i_win_ties: Does this character win the tie? If None, ties are determined by highest skill level.
+        :return: A dictionary containing if this character won, if they critical'd, if they failed, if they fumbled
+        """
+        # Make rolls, opponent is either a skill from character or fixed chance
+        my_success = self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses)
+        if opponent_category_bonus is None:
+            opponent_category_bonus = {}
+        if isinstance(opponent, int):
+            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=opponent_category_bonus)
+        else:
+            their_success = opponent.skill_roll(category_bonus=opponent_category_bonus)
+            opponent = opponent.chance
+
+        # Turn rolls into digestible form
+        my_success_int = _intify_success(my_success)
+        their_success_int = _intify_success(their_success)
+
+        # Compare success results
+        if my_success_int > their_success_int:
+            return {"i_won": True,
+                    "is_critical": my_success["critical"],
+                    "is_fail": my_success["is_fail"],
+                    "is_fumble": my_success["fumble"]}
+        if their_success_int > my_success_int:
+            return {"i_won": False,
+                    "is_critical": their_success["critical"],
+                    "is_fail": my_success["is_fail"],
+                    "is_fumble": their_success["fumble"]}
+        if i_win_ties is not None:
+            return {"i_won": i_win_ties,
+                    "is_critical": my_success["critical"],
+                    "is_fail": my_success["is_fail"],
+                    "is_fumble": my_success["fumble"]}
+        return {"i_won": self.skills[my_skill].chance >= opponent,
+                "is_critical": my_success["fumble"],
+                "is_fail": my_success["is_fail"],
+                "is_fumble": my_success["fumble"]}
+
+    def opposed_roll_subtraction(self,
+                                 opponent: Union[BasicRoleplaySkill, int] = 0,
+                                 opponent_category_bonus: Dict[str, int] = None,
+                                 my_skill: str = "") -> Dict[str, bool]:
+        """
+        An opposed skill check using the subtraction method. This should be called by the active character.
+        :param opponent: A skill from an opponent's character class or a static chance
+        :param opponent_category_bonus: opponent's category bonus dict
+        :param my_skill: The skill this character is using
+        :return: A success dictionary from a regular skill roll
+        """
+        if isinstance(opponent, int):
+            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=self.category_bonuses)
+        else:
+            their_success = opponent.skill_roll(category_bonus=opponent_category_bonus)
+            opponent = opponent.chance
+
+        their_success_int = _intify_success(their_success)
+        if their_success_int > 2:
+            if abs(self.skills[my_skill].chance - opponent) <= 5:
+                return BasicRoleplaySkill(chance=5).skill_roll(category_bonus=self.category_bonuses)
+            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses, modifier=-1 * opponent)
+        if their_success_int == 1:
+            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses, diff_multi=2)
+        return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses)
+
+    def opposed_roll_resistance_table(self,
+                                      opponent: Union[BasicRoleplaySkill, int] = 0,
+                                      my_skill: str = "") -> Dict[str, bool]:
+        """
+        Makes an opposing roll using the resistance table method
+        :param opponent: A skill from an opponent's character class or a static chance
+        :param my_skill: The skill this character is using
+        :return:
+        """
+        if not isinstance(opponent, int):
+            opponent = opponent.chance // 5
+        vs = self.skills[my_skill].chance // 5 - opponent
+        chance = 50 + 5 * vs
+        return roll_d100() <= chance
+
+    def opposed_roll_resistance(self,
+                                opponent: Union[BasicRoleplaySkill, int] = 0,
+                                my_skill: str = "") -> Dict[str, bool]:
+        """
+        Makes an opposing roll using the resistance table method
+        :param opponent: A skill from an opponent's character class or a static chance
+        :param my_skill: The skill this character is using
+        :return:
+        """
+        if not isinstance(opponent, int):
+            opponent = opponent.chance
+        vs = self.skills[my_skill].chance - opponent
+        chance = 50 + vs
+        return roll_d100() <= chance
+
+    def make_experience_rolls(self):
+        for skill in self.skills:
+            self.skills[skill].experience_roll(int_characteristic=self.INT,
+                                               improvement_dice=self.improvement_die)
+
+
+def _intify_success(success: dict = None):
+    if success["fumble"]:
+        return 1
+    if success["failure"]:
+        return 2
+    if success["critical"]:
+        return 5
+    if success["special"]:
+        return 4
+    if success["success"]:
+        return 3
+
 
 def _set_category_bonus(primary: int = 10,
                         secondary1: int = 10,
                         secondary2: int = 10,
                         negative: int = 10) -> int:
-    return (primary-10) + (secondary1-10)//2 + (secondary2-10)//2 + (10-negative)
+    return (primary - 10) + (secondary1 - 10) // 2 + (secondary2 - 10) // 2 + (10 - negative)
