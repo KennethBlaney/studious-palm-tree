@@ -30,6 +30,8 @@ class BasicRoleplaySkill:
 
     def skill_roll(self,
                    category_bonus: dict = None,
+                   armor_penalty: dict = None,
+                   fatigue_points: int = 0,
                    diff_multi: int = 1,
                    modifier: int = 0,
                    advantage: int = 0,
@@ -37,6 +39,8 @@ class BasicRoleplaySkill:
         """
         This rolls the skill and reports a dict of the levels of success
         :param category_bonus: bonus from the calling character's characteristics
+        :param armor_penalty: penalty from armor on a skill
+        :param fatigue_points: penalty for negative fatigue
         :param diff_multi: easy checks should double the skill, difficult or fatigued checks should half it
         :param modifier: a situational modifier for the skill roll, adds to chance of success
         :param advantage: positive values indicate additional rolls to take lowest, negative values indicate additional rolls to take highest
@@ -46,8 +50,16 @@ class BasicRoleplaySkill:
 
         if not category_bonus:
             category_bonus = {}
+        if not armor_penalty:
+            armor_penalty = {}
+        if fatigue_points > 0:
+            fatigue_points = 0
         roll = roll_d100(advantage)
-        total = roll - category_bonus.get(self.category, 0) - modifier
+        total = (roll
+                 - category_bonus.get(self.category, 0)
+                 + armor_penalty.get(self.category, 0)
+                 - modifier
+                 + fatigue_points)
         result = {
             "fumble": False,
             "failure": True,

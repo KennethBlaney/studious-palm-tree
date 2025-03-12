@@ -2,7 +2,7 @@ from typing import Union, Dict
 from dataclasses import dataclass, field
 
 from .brp_skill import BasicRoleplaySkill
-from ..utils import roll_d100, roll_ndm
+from ..utils import roll_d100, roll_ndm, roll_str
 
 skill_defaults: dict = {
     # Combat Skills
@@ -109,7 +109,13 @@ class BasicRoleplayCharacter:
     # equipment
     wealth: str = ""
     armor: str = ""
-    armor_protection: int = 0
+    armor_protection: int = 0  # can also be given as a roll string in the form ndm, should usually be positive
+    armor_category_penalty: dict = field(default_factory=lambda: {"combat": 0,
+                                                                  "communication": 0,
+                                                                  "manipulation": 0,
+                                                                  "mental": 0,
+                                                                  "perception": 0,
+                                                                  "physical": 0})
 
     # characteristics
     STR: int = 10
@@ -155,13 +161,26 @@ class BasicRoleplayCharacter:
     minor_wound: bool = False
     major_wound: bool = False
     fatal_wound: bool = False
+    sanity: int = 100
+    recent_san_loss: int = 0
+    temporarily_insane: bool = False
+    permanently_insane: bool = False
 
     def __post_init__(self):
         self._derived_characteristics()
         self._objectify_skills()
         self._set_default_skills()
-        if self.use_category_bonus or self.use_simple_category_bonus:
+        if self.use_category_bonus:
             self._set_category_bonuses()
+        elif self.use_simple_category_bonus:
+            self._set_simple_category_bonuses()
+        else:
+            self.category_bonuses = {"combat": 0,
+                                     "communication": 0,
+                                     "manipulation": 0,
+                                     "mental": 0,
+                                     "perception": 0,
+                                     "physical": 0}
 
     def improve_pow(self):
         if self.pow_improvement_check:
@@ -183,8 +202,10 @@ class BasicRoleplayCharacter:
             "right_arm": -(self.max_hit_points // -4),
             "chest": -(self.max_hit_points // -(10 / 4))
         }
+
         self.fatigue = self.STR + self.CON
         self.sanity = min(5 * self.POW, 100)
+        self.temp_insanity_score = -(self.sanity//-2)
 
     def _calc_damage_modifier(self) -> str:
         s = self.STR + self.SIZ
@@ -260,6 +281,14 @@ class BasicRoleplayCharacter:
                                  "perception": _set_category_bonus(self.INT, self.POW, self.CON),
                                  "physical": _set_category_bonus(self.DEX, self.STR, self.CON, self.SIZ)}
 
+    def _set_simple_category_bonuses(self):
+        self.category_bonuses = {"combat": -(self.DEX//-2),
+                                 "communication": -(self.CHA//-2),
+                                 "manipulation": -(self.DEX//-2),
+                                 "mental": -(self.INT//-2),
+                                 "perception": -(self.POW//-2),
+                                 "physical": -(self.STR//-2)}
+
     def _objectify_skills(self):
         for key, value in self.new_skill_defaults.items():
             self.new_skill_defaults[key] = BasicRoleplaySkill(**value)
@@ -269,24 +298,32 @@ class BasicRoleplayCharacter:
     def opposed_roll_highest_success(self,
                                      opponent: Union[BasicRoleplaySkill, int] = 0,
                                      opponent_category_bonus: Dict[str, int] = None,
+                                     opponent_armor_penalty: Dict[str, int] = None,
                                      my_skill: str = "",
                                      i_win_ties: bool = None) -> Dict[str, bool]:
         """
         Uses the highest success method to resolve a skill roll. Also, useful for combat.
         :param opponent: A skill from an opponent's character class or a static chance
         :param opponent_category_bonus: opponent's category bonus dict
+        :param opponent_armor_penalty: opponent's armor penalty dict
         :param my_skill: The skill this character is using
         :param i_win_ties: Does this character win the tie? If None, ties are determined by highest skill level.
         :return: A dictionary containing if this character won, if they critical'd, if they failed, if they fumbled
         """
         # Make rolls, opponent is either a skill from character or fixed chance
-        my_success = self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses)
+        my_success = self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
+                                                      armor_penalty=self.armor_category_penalty,
+                                                      fatigue_points=self.fatigue)
         if opponent_category_bonus is None:
             opponent_category_bonus = {}
+        if opponent_armor_penalty is None:
+            opponent_armor_penalty = {}
         if isinstance(opponent, int):
-            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=opponent_category_bonus)
+            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=opponent_category_bonus,
+                                                                           armor_penalty=opponent_armor_penalty)
         else:
-            their_success = opponent.skill_roll(category_bonus=opponent_category_bonus)
+            their_success = opponent.skill_roll(category_bonus=opponent_category_bonus,
+                                                armor_penalty=opponent_armor_penalty)
             opponent = opponent.chance
 
         # Turn rolls into digestible form
@@ -317,28 +354,45 @@ class BasicRoleplayCharacter:
     def opposed_roll_subtraction(self,
                                  opponent: Union[BasicRoleplaySkill, int] = 0,
                                  opponent_category_bonus: Dict[str, int] = None,
+                                 opponent_armor_penalty: Dict[str, int] = None,
                                  my_skill: str = "") -> Dict[str, bool]:
         """
         An opposed skill check using the subtraction method. This should be called by the active character.
         :param opponent: A skill from an opponent's character class or a static chance
         :param opponent_category_bonus: opponent's category bonus dict
+        :param opponent_armor_penalty: opponent's armor penalty dict
         :param my_skill: The skill this character is using
         :return: A success dictionary from a regular skill roll
         """
+        if opponent_category_bonus is None:
+            opponent_category_bonus = {}
+        if opponent_armor_penalty is None:
+            opponent_armor_penalty = {}
         if isinstance(opponent, int):
-            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=self.category_bonuses)
+            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=self.category_bonuses,
+                                                                           armor_penalty=self.armor_category_penalty,
+                                                                           fatigue_points=self.fatigue)
         else:
-            their_success = opponent.skill_roll(category_bonus=opponent_category_bonus)
+            their_success = opponent.skill_roll(category_bonus=opponent_category_bonus,
+                                                armor_penalty=opponent_armor_penalty)
             opponent = opponent.chance
 
         their_success_int = _intify_success(their_success)
         if their_success_int > 2:
             if abs(self.skills[my_skill].chance - opponent) <= 5:
-                return BasicRoleplaySkill(chance=5).skill_roll(category_bonus=self.category_bonuses)
-            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses, modifier=-1 * opponent)
+                return BasicRoleplaySkill(chance=5).skill_roll(lucky=True)
+            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
+                                                    armor_penalty=self.armor_category_penalty,
+                                                    fatigue_points=self.fatigue,
+                                                    modifier=-1 * opponent)
         if their_success_int == 1:
-            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses, diff_multi=2)
-        return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses)
+            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
+                                                    armor_penalty=self.armor_category_penalty,
+                                                    fatigue_points=self.fatigue,
+                                                    diff_multi=2)
+        return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
+                                                armor_penalty=self.armor_category_penalty,
+                                                fatigue_points=self.fatigue)
 
     def opposed_roll_resistance_table(self,
                                       opponent: Union[BasicRoleplaySkill, int] = 0,
@@ -385,7 +439,7 @@ class BasicRoleplayCharacter:
     def characteristic_roll(self, characteristic: str = "", multiplier: int = 0, advantage: int = 0, modifier: int = 0):
         if characteristic not in {"STR", "CON", "INT", "DEX", "POW", "CHA", "SIZ", "EDU"}:
             raise ValueError(f"Characteristic {characteristic} not a valid choice.")
-        return roll_d100(advantage=advantage)-modifier <= multiplier*self.__getattribute__(characteristic)
+        return roll_d100(advantage=advantage) - modifier <= multiplier * self.__getattribute__(characteristic)
 
     def take_damage(self, amount: int = 0, bypass_armor: bool = False, target: str = None):
         condition = {
@@ -398,7 +452,11 @@ class BasicRoleplayCharacter:
             "dying": False
         }
         if not bypass_armor:
-            amount -= self.armor_protection
+            if isinstance(self.armor_protection, str):
+                protection = roll_str(self.armor_protection)
+            else:
+                protection = self.armor_protection
+            amount -= protection
         if amount <= 0:
             return condition
 
@@ -410,7 +468,7 @@ class BasicRoleplayCharacter:
                     condition["unconscious"] = True
             if amount >= self.major_wound_level:
                 self.major_wound = True
-                condition["major_wound_timer"] = self.max_hit_points-self.damage
+                condition["major_wound_timer"] = self.max_hit_points - self.damage
                 if self.skills["Luck"].skill_roll(lucky=True)["failure"]:
                     condition["permanent_injury"] = True
             if self.damage >= self.max_hit_points:
@@ -423,7 +481,7 @@ class BasicRoleplayCharacter:
             if self.max_hit_points - self.damage <= 0:
                 condition["dying"] = True
             self.damage_location[target] += amount
-            self.damage += min(amount, 2*self.max_hp_location[target])
+            self.damage += min(amount, 2 * self.max_hp_location[target])
             if self.max_hp_location[target] <= self.damage_location[target] < 2 * self.max_hp_location[target]:
                 condition["disabled_body_part"] = target
             elif 2 * self.max_hp_location[target] <= self.damage_location[target] < 3 * self.max_hp_location[target]:
@@ -441,13 +499,47 @@ class BasicRoleplayCharacter:
         return condition
 
     def heal_damage(self, amount: int = 0, heal_wounds: bool = False, target: str = None):
-        self.damage = max(0, self.damage-amount)
+        self.damage = max(0, self.damage - amount)
         if heal_wounds:
             self.minor_wound = False
             self.major_wound = False
             self.fatal_wound = False
         if target:
-            self.damage_location[target] = max(0, self.damage_location[target]-amount)
+            self.damage_location[target] = max(0, self.damage_location[target] - amount)
+
+    def sanity_roll(self, loss_on_success: str = "0", loss_on_fail: str = "0"):
+        if roll_d100() <= self.sanity:
+            try:
+                self.sanity -= int(loss_on_success)
+                self.recent_san_loss += int(loss_on_success)
+            except ValueError:
+                self.sanity -= roll_str(loss_on_success)
+                self.recent_san_loss += roll_str(loss_on_success)
+        else:
+            try:
+                self.sanity -= int(loss_on_fail)
+                self.recent_san_loss += int(loss_on_fail)
+            except ValueError:
+                self.sanity -= roll_str(loss_on_fail)
+                self.recent_san_loss += roll_str(loss_on_fail)
+        if self.recent_san_loss >= self.temp_insanity_score:
+            self.temporarily_insane = True
+        if self.sanity <= 0:
+            self.permanently_insane = True
+
+    def recover_sanity(self, amount: str = "0"):
+        """
+        Use this to recover sanity or with default amounts to just remove temporary insanity
+        """
+        try:
+            self.sanity += int(amount)
+        except ValueError:
+            self.sanity += roll_str(amount)
+        self.sanity = min(self.sanity, 100-self.skills["Blasphemous Lore"])
+        self.temporarily_insane = False
+
+    def modify_fatigue(self, amount: int = 0):
+        self.fatigue += amount
 
 
 def _intify_success(success: dict = None):
