@@ -25,3 +25,13 @@ def roll_ndm(n: int = 0, m: int = 0) -> int:
     for _ in range(0, n):
         s += randint(1, m)
     return s
+
+
+def roll_str(roll: str = ""):
+    _roll = roll.lower().split("d")
+    if len(_roll) == 2:
+        try:
+            return roll_ndm(int(_roll[0]), int(_roll[1]))
+        except ValueError:
+            raise ValueError(f"{roll} is not a valid string roll")
+    raise ValueError(f"{roll} is not a valid string roll")

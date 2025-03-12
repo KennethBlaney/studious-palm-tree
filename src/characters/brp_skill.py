@@ -29,7 +29,7 @@ class BasicRoleplaySkill:
         self.chance += amount
 
     def skill_roll(self,
-                   category_bonus: dict = 0,
+                   category_bonus: dict = None,
                    diff_multi: int = 1,
                    modifier: int = 0,
                    advantage: int = 0,
@@ -44,8 +44,10 @@ class BasicRoleplaySkill:
         :return: dict of possible success states
         """
 
+        if not category_bonus:
+            category_bonus = {}
         roll = roll_d100(advantage)
-        total = roll + category_bonus.get(self.category, 0) + modifier
+        total = roll - category_bonus.get(self.category, 0) - modifier
         result = {
             "fumble": False,
             "failure": True,
@@ -58,7 +60,7 @@ class BasicRoleplaySkill:
         if self.chance == 0 and roll == 1 and lucky:
             result["failure"], result["success"] = False, True
             return result
-        if roll >= 99:
+        if roll >= 100-(100-self.chance)//20:
             result["fumble"] = True
         elif total <= diff_multi * self.chance:
             result["failure"], result["success"] = False, True

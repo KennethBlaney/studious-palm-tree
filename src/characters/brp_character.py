@@ -108,6 +108,8 @@ class BasicRoleplayCharacter:
 
     # equipment
     wealth: str = ""
+    armor: str = ""
+    armor_protection: int = 0
 
     # characteristics
     STR: int = 10
@@ -133,6 +135,11 @@ class BasicRoleplayCharacter:
     # skills
     skills: dict = field(default_factory=lambda: {})  # used for skills that this character had increased from defaults
     new_skill_defaults: dict = field(default_factory=lambda: {})  # used to add new skills unique to the setting
+    spells: set = field(default_factory=lambda: set())
+    mutations: set = field(default_factory=lambda: set())
+    psychic_powers: set = field(default_factory=lambda: set())
+    sorceries: set = field(default_factory=lambda: set())
+    superpowers: set = field(default_factory=lambda: set())
 
     # health
     damage: int = 0
@@ -145,6 +152,9 @@ class BasicRoleplayCharacter:
         "right_arm": 0,
         "chest": 0
     })
+    minor_wound: bool = False
+    major_wound: bool = False
+    fatal_wound: bool = False
 
     def __post_init__(self):
         self._derived_characteristics()
@@ -164,7 +174,6 @@ class BasicRoleplayCharacter:
         self.max_hit_points = self._calc_hit_points()
         self.major_wound_level = -(self.max_hit_points // -2)
         self.power_points, self.max_power_points = self.POW, self.POW
-        self.experience_bonus = -(self.INT // -2)
         self.max_hp_location = {
             "left_leg": -(self.max_hit_points // -3),
             "right_leg": -(self.max_hit_points // -3),
@@ -218,6 +227,22 @@ class BasicRoleplayCharacter:
             skill_defaults["Fly"].chance = .5 * self.DEX
         if self.energy_projection:
             skill_defaults["Projection"].chance = 2 * self.DEX
+
+        # characteristic rolls are treated as skill rolls
+        skill_defaults["Effort"] = BasicRoleplaySkill(
+            **{"name": "Effort", "category": "", "chance": 5 * self.STR, "can_be_improved_through_experience": False})
+        skill_defaults["Stamina"] = BasicRoleplaySkill(
+            **{"name": "Stamina", "category": "", "chance": 5 * self.CON, "can_be_improved_through_experience": False})
+        skill_defaults["Idea"] = BasicRoleplaySkill(
+            **{"name": "Idea", "category": "", "chance": 5 * self.INT, "can_be_improved_through_experience": False})
+        skill_defaults["Luck"] = BasicRoleplaySkill(
+            **{"name": "Luck", "category": "", "chance": 5 * self.POW, "can_be_improved_through_experience": False})
+        skill_defaults["Agility"] = BasicRoleplaySkill(
+            **{"name": "Agility", "category": "", "chance": 5 * self.DEX, "can_be_improved_through_experience": False})
+        skill_defaults["Charm"] = BasicRoleplaySkill(
+            **{"name": "Charm", "category": "", "chance": 5 * self.CHA, "can_be_improved_through_experience": False})
+        skill_defaults["Know"] = BasicRoleplaySkill(
+            **{"name": "Know", "category": "", "chance": 5 * self.EDU, "can_be_improved_through_experience": False})
 
         # incorporate passed in skills
         skill_defaults.update(self.new_skill_defaults)
@@ -345,10 +370,81 @@ class BasicRoleplayCharacter:
         chance = 50 + vs
         return roll_d100() <= chance
 
+    def opposed_pow_check(self,
+                          opponent: Union[BasicRoleplaySkill, int] = 0) -> Dict[str, bool]:
+        result = self.opposed_roll_resistance_table(opponent=opponent, my_skill="Luck")
+        if result["success"]:
+            self.pow_improvement_check = True
+        return result
+
     def make_experience_rolls(self):
         for skill in self.skills:
             self.skills[skill].experience_roll(int_characteristic=self.INT,
                                                improvement_dice=self.improvement_die)
+
+    def characteristic_roll(self, characteristic: str = "", multiplier: int = 0, advantage: int = 0, modifier: int = 0):
+        if characteristic not in {"STR", "CON", "INT", "DEX", "POW", "CHA", "SIZ", "EDU"}:
+            raise ValueError(f"Characteristic {characteristic} not a valid choice.")
+        return roll_d100(advantage=advantage)-modifier <= multiplier*self.__getattribute__(characteristic)
+
+    def take_damage(self, amount: int = 0, bypass_armor: bool = False, target: str = None):
+        condition = {
+            "unconscious": False,
+            "major_wound_timer": None,
+            "permanent_injury": False,
+            "disabled_body_part": None,
+            "maimed_body_part": None,
+            "severed_body_part": None,
+            "dying": False
+        }
+        if not bypass_armor:
+            amount = max(0, amount-self.armor_protection)
+        if target not in self.damage_location:
+            self.damage += amount
+            if not self.minor_wound and self.damage >= self.major_wound_level:
+                self.minor_wound = True
+                if self.skills["Luck"].skill_roll(lucky=True)["failure"]:
+                    condition["unconscious"] = True
+            if amount >= self.major_wound_level:
+                self.major_wound = True
+                condition["major_wound_timer"] = self.max_hit_points-self.damage
+                if self.skills["Luck"].skill_roll(lucky=True)["failure"]:
+                    condition["permanent_injury"] = True
+            if self.damage >= self.max_hit_points:
+                self.fatal_wound = True
+                condition["unconscious"] = True
+                condition["dying"] = True
+        else:
+            if self.max_hit_points - self.damage <= 2:
+                condition["unconscious"] = True
+            if self.max_hit_points - self.damage <= 0:
+                condition["dying"] = True
+            self.damage_location[target] += amount
+            self.damage += min(amount, 2*self.max_hp_location[target])
+            if self.max_hp_location[target] <= self.damage_location[target] < 2 * self.max_hp_location[target]:
+                condition["disabled_body_part"] = target
+            elif 2 * self.max_hp_location[target] <= self.damage_location[target] < 3 * self.max_hp_location[target]:
+                condition["disabled_body_part"] = target
+                condition["unconscious"] = True
+            elif 3 * self.max_hp_location[target] <= self.damage_location[target] < 4 * self.max_hp_location[target]:
+                condition["disabled_body_part"] = target
+                condition["unconscious"] = True
+                condition["maimed_body_part"] = target
+            elif 4 * self.max_hp_location[target] <= self.damage_location[target]:
+                condition["disabled_body_part"] = target
+                condition["unconscious"] = True
+                condition["maimed_body_part"] = target
+                condition["severed_body_part"] = target
+        return condition
+
+    def heal_damage(self, amount: int = 0, heal_wounds: bool = False, target: str = None):
+        self.damage = max(0, self.damage-amount)
+        if heal_wounds:
+            self.minor_wound = False
+            self.major_wound = False
+            self.fatal_wound = False
+        if target:
+            self.damage_location[target] = max(0, self.damage_location[target]-amount)
 
 
 def _intify_success(success: dict = None):
