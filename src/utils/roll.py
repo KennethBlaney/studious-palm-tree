@@ -1,5 +1,4 @@
 from random import randint
-from math import fabs
 
 
 def roll_d100(advantage: int = 0) -> int:
@@ -9,7 +8,7 @@ def roll_d100(advantage: int = 0) -> int:
     :return: a value from the dice roll
     """
     rolls = []
-    for _ in range(0, int(fabs(advantage))+1):
+    for _ in range(0, abs(advantage)+1):
         rolls.append(randint(1, 100))
     if advantage > 0:
         return min(rolls)
@@ -31,6 +30,8 @@ def roll_str(roll: str = ""):
     _roll = roll.lower().split("d")
     if len(_roll) == 2:
         try:
+            if _roll[0][0] == "-":
+                return -1 * roll_ndm(-1 * int(_roll[0]), int(_roll[1]))
             return roll_ndm(int(_roll[0]), int(_roll[1]))
         except ValueError:
             raise ValueError(f"{roll} is not a valid string roll")

@@ -398,7 +398,10 @@ class BasicRoleplayCharacter:
             "dying": False
         }
         if not bypass_armor:
-            amount = max(0, amount-self.armor_protection)
+            amount -= self.armor_protection
+        if amount <= 0:
+            return condition
+
         if target not in self.damage_location:
             self.damage += amount
             if not self.minor_wound and self.damage >= self.major_wound_level:
