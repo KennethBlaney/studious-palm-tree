@@ -1,6 +1,6 @@
+import json
 from typing import Union, Dict
-from dataclasses import dataclass, field
-from pydantic import BaseModel
+from dataclasses import dataclass, field, asdict
 
 from .brp_skill import BasicRoleplaySkill
 from ..utils import roll_d100, roll_ndm, roll_str
@@ -88,7 +88,7 @@ skill_defaults: dict = {
 
 
 @dataclass
-class BasicRoleplayCharacter(BaseModel):
+class BasicRoleplayCharacter:
     """
     The BasicRoleplayCharacter is the base class that you should use for a character class in your game.
     It contains the variables for a player character from the Basic Roleplaying - Universal Game Engine rule set
@@ -96,8 +96,6 @@ class BasicRoleplayCharacter(BaseModel):
 
     NPCs are, functionally, scaled back PCs. With that in mind, feel free to set only the relevant variables for an NPC
     and leave the others as default.
-
-    TODO: Add function for loading and saving a character to JSON
     """
     # biographical information
     name: str = ""
@@ -155,11 +153,11 @@ class BasicRoleplayCharacter(BaseModel):
     # skills
     skills: dict = field(default_factory=lambda: {})  # used for skills that this character had increased from defaults
     new_skill_defaults: dict = field(default_factory=lambda: {})  # used to add new skills unique to the setting
-    spells: set = field(default_factory=lambda: set())
-    mutations: set = field(default_factory=lambda: set())
-    psychic_powers: set = field(default_factory=lambda: set())
-    sorceries: set = field(default_factory=lambda: set())
-    superpowers: set = field(default_factory=lambda: set())
+    spells: list = field(default_factory=lambda: list())
+    mutations: list = field(default_factory=lambda: list())
+    psychic_powers: list = field(default_factory=lambda: list())
+    sorceries: list = field(default_factory=lambda: list())
+    superpowers: list = field(default_factory=lambda: list())
 
     # health
     damage: int = 0
@@ -595,8 +593,11 @@ def _set_category_bonus(primary: int = 10,
 
 
 def load_character_from_json(filepath: str) -> BasicRoleplayCharacter:
-    pass
+    return BasicRoleplayCharacter(**json.loads(filepath))
 
 
-def save_character_to_json(character: BasicRoleplayCharacter, filepath: str) -> bool:
-    pass
+def save_character_to_json(character: BasicRoleplayCharacter, filepath: str):
+    data = json.dumps(asdict(character))
+    with open(filepath, "w") as fh:
+        fh.write(data)
+

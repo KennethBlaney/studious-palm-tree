@@ -1,12 +1,11 @@
 from typing import Dict
 from dataclasses import dataclass
-from pydantic import BaseModel
 
 from ..utils import roll_d100, roll_ndm
 
 
 @dataclass
-class BasicRoleplaySkill(BaseModel):
+class BasicRoleplaySkill:
     name: str = ""
     category: str = ""
     chance: int = 0
