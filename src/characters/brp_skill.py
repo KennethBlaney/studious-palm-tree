@@ -56,9 +56,9 @@ class BasicRoleplaySkill:
             fatigue_points = 0
         roll = roll_d100(advantage)
         total = (roll
-                 - category_bonus.get(self.category, 0)
-                 + armor_penalty.get(self.category, 0)
-                 - modifier
+                 + category_bonus.get(self.category, 0)
+                 - armor_penalty.get(self.category, 0)
+                 + modifier
                  + fatigue_points)
         result = {
             "fumble": False,

@@ -219,7 +219,7 @@ class BasicRoleplayCharacter:
 
         self.fatigue = self.STR + self.CON
         self.sanity = min(5 * self.POW, 100)
-        self.temp_insanity_score = -(self.sanity//-2)
+        self.temp_insanity_score = -(self.sanity // -2)
 
     def _calc_damage_modifier(self) -> str:
         s = self.STR + self.SIZ
@@ -296,18 +296,45 @@ class BasicRoleplayCharacter:
                                  "physical": _set_category_bonus(self.DEX, self.STR, self.CON, self.SIZ)}
 
     def _set_simple_category_bonuses(self):
-        self.category_bonuses = {"combat": -(self.DEX//-2),
-                                 "communication": -(self.CHA//-2),
-                                 "manipulation": -(self.DEX//-2),
-                                 "mental": -(self.INT//-2),
-                                 "perception": -(self.POW//-2),
-                                 "physical": -(self.STR//-2)}
+        self.category_bonuses = {"combat": -(self.DEX // -2),
+                                 "communication": -(self.CHA // -2),
+                                 "manipulation": -(self.DEX // -2),
+                                 "mental": -(self.INT // -2),
+                                 "perception": -(self.POW // -2),
+                                 "physical": -(self.STR // -2)}
 
     def _objectify_skills(self):
         for key, value in self.new_skill_defaults.items():
             self.new_skill_defaults[key] = BasicRoleplaySkill(**value)
         for key, value in self.skills.items():
             self.skills[key] = BasicRoleplaySkill(**value)
+
+    def make_skill_roll(self,
+                        skill: str = "",
+                        difficulty: int = 1,
+                        modifier: int = 0,
+                        advantage: int = 0,
+                        lucky: bool = False):
+        if skill in self.skills:
+            return self.skills[skill].skill_roll(category_bonus=self.category_bonuses,
+                                                 armor_penalty=self.armor_category_penalty,
+                                                 fatigue_points=self.fatigue,
+                                                 diff_multi=difficulty,
+                                                 modifier=modifier,
+                                                 advantage=advantage,
+                                                 lucky=lucky)
+        else:
+            _skill = " ".join(skill.split(" ")[0:-1] + ["(various)"])
+            try:
+                return self.skills[_skill].skill_roll(category_bonus=self.category_bonuses,
+                                                      armor_penalty=self.armor_category_penalty,
+                                                      fatigue_points=self.fatigue,
+                                                      diff_multi=difficulty,
+                                                      modifier=modifier,
+                                                      advantage=advantage,
+                                                      lucky=lucky)
+            except KeyError:
+                raise KeyError(f"Selected skill {skill} is not a valid skill and has no generic type")
 
     def opposed_roll_highest_success(self,
                                      opponent: Union[BasicRoleplaySkill, int] = 0,
@@ -325,9 +352,7 @@ class BasicRoleplayCharacter:
         :return: A dictionary containing if this character won, if they critical'd, if they failed, if they fumbled
         """
         # Make rolls, opponent is either a skill from character or fixed chance
-        my_success = self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
-                                                      armor_penalty=self.armor_category_penalty,
-                                                      fatigue_points=self.fatigue)
+        my_success = self.make_skill_roll(skill=my_skill)
         if opponent_category_bonus is None:
             opponent_category_bonus = {}
         if opponent_armor_penalty is None:
@@ -383,9 +408,8 @@ class BasicRoleplayCharacter:
         if opponent_armor_penalty is None:
             opponent_armor_penalty = {}
         if isinstance(opponent, int):
-            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=self.category_bonuses,
-                                                                           armor_penalty=self.armor_category_penalty,
-                                                                           fatigue_points=self.fatigue)
+            their_success = BasicRoleplaySkill(chance=opponent).skill_roll(category_bonus=opponent_category_bonus,
+                                                                           armor_penalty=opponent_armor_penalty)
         else:
             their_success = opponent.skill_roll(category_bonus=opponent_category_bonus,
                                                 armor_penalty=opponent_armor_penalty)
@@ -395,18 +419,12 @@ class BasicRoleplayCharacter:
         if their_success_int > 2:
             if abs(self.skills[my_skill].chance - opponent) <= 5:
                 return BasicRoleplaySkill(chance=5).skill_roll(lucky=True)
-            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
-                                                    armor_penalty=self.armor_category_penalty,
-                                                    fatigue_points=self.fatigue,
-                                                    modifier=-1 * opponent)
+            return self.make_skill_roll(skill=my_skill,
+                                        modifier=-1*opponent)
+
         if their_success_int == 1:
-            return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
-                                                    armor_penalty=self.armor_category_penalty,
-                                                    fatigue_points=self.fatigue,
-                                                    diff_multi=2)
-        return self.skills[my_skill].skill_roll(category_bonus=self.category_bonuses,
-                                                armor_penalty=self.armor_category_penalty,
-                                                fatigue_points=self.fatigue)
+            return self.make_skill_roll(skill=my_skill, difficulty=2)
+        return self.make_skill_roll(skill=my_skill)
 
     def opposed_roll_resistance_table(self,
                                       opponent: Union[BasicRoleplaySkill, int] = 0,
@@ -549,7 +567,7 @@ class BasicRoleplayCharacter:
             self.sanity += int(amount)
         except ValueError:
             self.sanity += roll_str(amount)
-        self.sanity = min(self.sanity, 100-self.skills["Blasphemous Lore"])
+        self.sanity = min(self.sanity, 100 - self.skills["Blasphemous Lore"])
         self.temporarily_insane = False
 
     def modify_fatigue(self, amount: int = 0):
