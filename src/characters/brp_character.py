@@ -1,5 +1,6 @@
 from typing import Union, Dict
 from dataclasses import dataclass, field
+from pydantic import BaseModel
 
 from .brp_skill import BasicRoleplaySkill
 from ..utils import roll_d100, roll_ndm, roll_str
@@ -87,7 +88,7 @@ skill_defaults: dict = {
 
 
 @dataclass
-class BasicRoleplayCharacter:
+class BasicRoleplayCharacter(BaseModel):
     """
     The BasicRoleplayCharacter is the base class that you should use for a character class in your game.
     It contains the variables for a player character from the Basic Roleplaying - Universal Game Engine rule set
@@ -97,7 +98,6 @@ class BasicRoleplayCharacter:
     and leave the others as default.
 
     TODO: Add function for loading and saving a character to JSON
-    TODO: Expand skill rolls to fall back to general skills, for example "Art (Painting)" -> "Art (various)"
     """
     # biographical information
     name: str = ""
@@ -592,3 +592,11 @@ def _set_category_bonus(primary: int = 10,
                         secondary2: int = 10,
                         negative: int = 10) -> int:
     return (primary - 10) + (secondary1 - 10) // 2 + (secondary2 - 10) // 2 + (10 - negative)
+
+
+def load_character_from_json(filepath: str) -> BasicRoleplayCharacter:
+    pass
+
+
+def save_character_to_json(character: BasicRoleplayCharacter, filepath: str) -> bool:
+    pass

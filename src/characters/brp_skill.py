@@ -1,11 +1,12 @@
 from typing import Dict
 from dataclasses import dataclass
+from pydantic import BaseModel
 
 from ..utils import roll_d100, roll_ndm
 
 
 @dataclass
-class BasicRoleplaySkill:
+class BasicRoleplaySkill(BaseModel):
     name: str = ""
     category: str = ""
     chance: int = 0
@@ -43,7 +44,8 @@ class BasicRoleplaySkill:
         :param fatigue_points: penalty for negative fatigue
         :param diff_multi: easy checks should double the skill, difficult or fatigued checks should half it
         :param modifier: a situational modifier for the skill roll, adds to chance of success
-        :param advantage: positive values indicate additional rolls to take lowest, negative values indicate additional rolls to take highest
+        :param advantage: positive values indicate additional rolls to take lowest,
+                          negative values indicate additional rolls to take highest
         :param lucky: allows a 1% chance of success on a skill with 0 chance
         :return: dict of possible success states
         """
