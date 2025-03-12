@@ -88,6 +88,17 @@ skill_defaults: dict = {
 
 @dataclass
 class BasicRoleplayCharacter:
+    """
+    The BasicRoleplayCharacter is the base class that you should use for a character class in your game.
+    It contains the variables for a player character from the Basic Roleplaying - Universal Game Engine rule set
+    and includes functions for skill rolls, opposed roles, sanity rolls, etc.
+
+    NPCs are, functionally, scaled back PCs. With that in mind, feel free to set only the relevant variables for an NPC
+    and leave the others as default.
+
+    TODO: Add function for loading and saving a character to JSON
+    TODO: Expand skill rolls to fall back to general skills, for example "Art (Painting)" -> "Art (various)"
+    """
     # biographical information
     name: str = ""
     gender: str = ""
@@ -116,6 +127,9 @@ class BasicRoleplayCharacter:
                                                                   "mental": 0,
                                                                   "perception": 0,
                                                                   "physical": 0})
+    primary_weapon_damage: str = "0"
+    secondary_weapon_damage: str = "0"
+    ranged_weapon_damage: str = "0"
 
     # characteristics
     STR: int = 10
