@@ -593,7 +593,8 @@ def _set_category_bonus(primary: int = 10,
 
 
 def load_character_from_json(filepath: str) -> BasicRoleplayCharacter:
-    return BasicRoleplayCharacter(**json.loads(filepath))
+    with open(filepath, "r") as fh:
+        return BasicRoleplayCharacter(**json.loads(fh.read()))
 
 
 def save_character_to_json(character: BasicRoleplayCharacter, filepath: str):
