@@ -16,8 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 keywords = ["rpg", "ttrpg", "basic roleplaying", "orc"]
-dependencies = [
-]
+dependencies = [ "json", "typing", "dataclasses", "random"]
 requires-python = ">=3.9"
 
 [project.optional-dependencies]
@@ -25,3 +24,4 @@ dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
 
 [project.urls]
 Homepage = "https://github.com/KennethBlaney/studious-palm-tree"
+Issues = "https://github.com/KennethBlaney/studious-palm-tree/issues"
