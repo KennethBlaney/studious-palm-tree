@@ -194,12 +194,6 @@ class BasicRoleplayCharacter:
                                      "perception": 0,
                                      "physical": 0}
 
-    def improve_pow(self):
-        if self.pow_improvement_check:
-            target = 5 * (self.max_species_pow + self.min_species_pow - self.POW)
-            if roll_d100() < target:
-                self.POW += roll_ndm(1, 3) - 1
-
     def _derived_characteristics(self):
         self.damage_modifier = self._calc_damage_modifier()
         self.max_hit_points = self._calc_hit_points()
@@ -253,7 +247,7 @@ class BasicRoleplayCharacter:
         if self.literate:
             skill_defaults["Literacy"].chance = skill_defaults[f"Language ({self.primary_language}"].chance
         skill_defaults["Gaming"] = BasicRoleplaySkill(
-            **{"name": "Language (own)", "category": "communication", "chance": self.INT + self.POW})
+            **{"name": "Gaming", "category": "communication", "chance": self.INT + self.POW})
         if self.can_fly:
             skill_defaults["Fly"].chance = 4 * self.DEX
         else:
@@ -460,6 +454,12 @@ class BasicRoleplayCharacter:
         if result["success"]:
             self.pow_improvement_check = True
         return result
+
+    def improve_pow(self):
+        if self.pow_improvement_check:
+            target = 5 * (self.max_species_pow + self.min_species_pow - self.POW)
+            if roll_d100() < target:
+                self.POW += roll_ndm(1, 3) - 1
 
     def make_experience_rolls(self):
         for skill in self.skills:

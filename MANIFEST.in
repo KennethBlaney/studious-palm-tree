@@ -1,3 +1,4 @@
 # MANIFEST.in
 
-#include src/DIRECTORY_NAMES_HERE/*.toml
+#include src/sheets/*.toml
+#include src/utils/*.toml
