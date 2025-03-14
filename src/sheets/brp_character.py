@@ -1,6 +1,7 @@
 import json
 from typing import Union, Dict
 from dataclasses import dataclass, field, asdict
+from dataclasses_json import dataclass_json, Undefined
 
 from .brp_skill import BasicRoleplaySkill
 from ..utils import roll_d100, roll_ndm, roll_str
@@ -87,6 +88,7 @@ skill_defaults: dict = {
 }
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class BasicRoleplayCharacter:
     """
@@ -151,7 +153,6 @@ class BasicRoleplayCharacter:
     superpower: bool = False
 
     # skills
-    SkillClass: bool = False
     skills: dict = field(default_factory=lambda: {})  # used for skills that this character had increased from defaults
     new_skill_defaults: dict = field(default_factory=lambda: {})  # used to add new skills unique to the setting
     spells: list = field(default_factory=lambda: list())
@@ -182,8 +183,6 @@ class BasicRoleplayCharacter:
     def __post_init__(self):
         self.SkillClass = BasicRoleplaySkill
         self._derived_characteristics()
-        self._objectify_skills()
-        self._set_default_skills()
         if self.use_category_bonus:
             self._set_category_bonuses()
         elif self.use_simple_category_bonus:
@@ -200,6 +199,9 @@ class BasicRoleplayCharacter:
         self.SkillClass = SkillClass
         if not issubclass(self.SkillClass, BasicRoleplaySkill):
             raise TypeError("A character's SkillClass should be a subclass of BasicRoleplaySkill.")
+        print(f"self.SkillClass is {self.SkillClass}")
+        self._objectify_skills()
+        self._set_default_skills()
         self._change_class_for_skills()
 
     def _change_class_for_skills(self):

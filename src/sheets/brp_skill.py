@@ -1,9 +1,11 @@
 from typing import Dict
 from dataclasses import dataclass
+from dataclasses_json import dataclass_json, Undefined
 
 from ..utils import roll_d100, roll_ndm
 
 
+@dataclass_json(undefined=Undefined.EXCLUDE)
 @dataclass
 class BasicRoleplaySkill:
     name: str = ""

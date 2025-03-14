@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 keywords = ["rpg", "ttrpg", "basic roleplaying", "orc"]
-dependencies = [ "json", "typing", "dataclasses", "random"]
+dependencies = [ "json", "typing", "dataclasses", "dataclasses_json", "random"]
 requires-python = ">=3.9"
 
 [project.optional-dependencies]
