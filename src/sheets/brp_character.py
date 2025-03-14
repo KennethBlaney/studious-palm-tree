@@ -180,6 +180,8 @@ class BasicRoleplayCharacter:
     permanently_insane: bool = False
 
     def __post_init__(self):
+        if not issubclass(self.SkillClass, BasicRoleplaySkill):
+            raise TypeError("A character's SkillClass should be a subclass of BasicRoleplaySkill.")
         self._derived_characteristics()
         self._objectify_skills()
         self._set_default_skills()
@@ -598,7 +600,7 @@ def load_character_from_json(filepath: str,
     if issubclass(CharacterClass, BasicRoleplayCharacter):
         with open(filepath, "r") as fh:
             return CharacterClass(**json.loads(fh.read()))
-    raise TypeError("CharacterClass should be an instance of BasicRoleplayCharacter.")
+    raise TypeError("On load a CharacterClass should be a subclass of BasicRoleplayCharacter")
 
 
 def save_character_to_json(character: BasicRoleplayCharacter, filepath: str):
