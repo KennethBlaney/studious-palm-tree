@@ -96,8 +96,6 @@ class BasicRoleplayCharacter:
 
     NPCs are, functionally, scaled back PCs. With that in mind, feel free to set only the relevant variables for an NPC
     and leave the others as default.
-
-    TODO: make the character sheet draw from a variable that sets the skill sheet type so people can make their own skill class
     """
     # biographical information
     name: str = ""
@@ -153,6 +151,7 @@ class BasicRoleplayCharacter:
     superpower: bool = False
 
     # skills
+    SkillClass: dataclass = BasicRoleplaySkill
     skills: dict = field(default_factory=lambda: {})  # used for skills that this character had increased from defaults
     new_skill_defaults: dict = field(default_factory=lambda: {})  # used to add new skills unique to the setting
     spells: list = field(default_factory=lambda: list())
@@ -299,9 +298,9 @@ class BasicRoleplayCharacter:
 
     def _objectify_skills(self):
         for key, value in self.new_skill_defaults.items():
-            self.new_skill_defaults[key] = BasicRoleplaySkill(**value)
+            self.new_skill_defaults[key] = self.SkillClass(**value)
         for key, value in self.skills.items():
-            self.skills[key] = BasicRoleplaySkill(**value)
+            self.skills[key] = self.SkillClass(**value)
 
     def make_skill_roll(self,
                         skill: str = "",
