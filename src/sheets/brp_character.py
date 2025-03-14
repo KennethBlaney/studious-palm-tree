@@ -96,6 +96,8 @@ class BasicRoleplayCharacter:
 
     NPCs are, functionally, scaled back PCs. With that in mind, feel free to set only the relevant variables for an NPC
     and leave the others as default.
+
+    TODO: make the character sheet draw from a variable that sets the skill sheet type so people can make their own skill class
     """
     # biographical information
     name: str = ""
@@ -592,13 +594,15 @@ def _set_category_bonus(primary: int = 10,
     return (primary - 10) + (secondary1 - 10) // 2 + (secondary2 - 10) // 2 + (10 - negative)
 
 
-def load_character_from_json(filepath: str) -> BasicRoleplayCharacter:
-    with open(filepath, "r") as fh:
-        return BasicRoleplayCharacter(**json.loads(fh.read()))
+def load_character_from_json(filepath: str,
+                             CharacterClass: dataclass = BasicRoleplayCharacter) -> BasicRoleplayCharacter:
+    if issubclass(CharacterClass, BasicRoleplayCharacter):
+        with open(filepath, "r") as fh:
+            return CharacterClass(**json.loads(fh.read()))
+    raise TypeError("CharacterClass should be an instance of BasicRoleplayCharacter.")
 
 
 def save_character_to_json(character: BasicRoleplayCharacter, filepath: str):
     data = json.dumps(asdict(character))
     with open(filepath, "w") as fh:
         fh.write(data)
-
