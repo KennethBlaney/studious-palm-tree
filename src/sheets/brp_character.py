@@ -151,7 +151,7 @@ class BasicRoleplayCharacter:
     superpower: bool = False
 
     # skills
-    SkillClass: dataclass = BasicRoleplaySkill
+    SkillClass: bool = False
     skills: dict = field(default_factory=lambda: {})  # used for skills that this character had increased from defaults
     new_skill_defaults: dict = field(default_factory=lambda: {})  # used to add new skills unique to the setting
     spells: list = field(default_factory=lambda: list())
@@ -180,8 +180,7 @@ class BasicRoleplayCharacter:
     permanently_insane: bool = False
 
     def __post_init__(self):
-        if not issubclass(self.SkillClass, BasicRoleplaySkill):
-            raise TypeError("A character's SkillClass should be a subclass of BasicRoleplaySkill.")
+        self.SkillClass = BasicRoleplaySkill
         self._derived_characteristics()
         self._objectify_skills()
         self._set_default_skills()
@@ -196,6 +195,16 @@ class BasicRoleplayCharacter:
                                      "mental": 0,
                                      "perception": 0,
                                      "physical": 0}
+
+    def set_skill_class(self, SkillClass: dataclass = BasicRoleplaySkill):
+        self.SkillClass = SkillClass
+        if not issubclass(self.SkillClass, BasicRoleplaySkill):
+            raise TypeError("A character's SkillClass should be a subclass of BasicRoleplaySkill.")
+        self._change_class_for_skills()
+
+    def _change_class_for_skills(self):
+        for skill in self.skills:
+            self.skills[skill] = self.SkillClass(**asdict(self.skills[skill]))
 
     def _derived_characteristics(self):
         self.damage_modifier = self._calc_damage_modifier()
@@ -596,14 +605,20 @@ def _set_category_bonus(primary: int = 10,
 
 
 def load_character_from_json(filepath: str,
-                             CharacterClass: dataclass = BasicRoleplayCharacter) -> BasicRoleplayCharacter:
+                             CharacterClass: dataclass = BasicRoleplayCharacter,
+                             SkillClass: dataclass = BasicRoleplaySkill) -> BasicRoleplayCharacter:
     if issubclass(CharacterClass, BasicRoleplayCharacter):
         with open(filepath, "r") as fh:
-            return CharacterClass(**json.loads(fh.read()))
+            character = CharacterClass(**json.loads(fh.read()))
+            character.set_skill_class(SkillClass)
+            return character
     raise TypeError("On load a CharacterClass should be a subclass of BasicRoleplayCharacter")
 
 
 def save_character_to_json(character: BasicRoleplayCharacter, filepath: str):
+    temp_var = character.SkillClass
+    del character.SkillClass
     data = json.dumps(asdict(character))
     with open(filepath, "w") as fh:
         fh.write(data)
+    character.SkillClass = temp_var

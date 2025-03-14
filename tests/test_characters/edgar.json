@@ -1,0 +1,534 @@
+{
+  "name": "Edgar",
+  "gender": "",
+  "age": 0,
+  "tough": false,
+  "use_category_bonus": true,
+  "use_simple_category_bonus": false,
+  "use_education": true,
+  "personality_type": "",
+  "profession": "",
+  "power_level": "",
+  "improvement_die": 6,
+  "primary_language": "",
+  "literate": true,
+  "can_drive": true,
+  "can_fly": true,
+  "energy_projection": false,
+  "wealth": "",
+  "armor": "",
+  "armor_protection": 0,
+  "armor_category_penalty": {
+    "combat": 0,
+    "communication": 0,
+    "manipulation": 0,
+    "mental": 0,
+    "perception": 0,
+    "physical": 0
+  },
+  "primary_weapon_damage": "0",
+  "secondary_weapon_damage": "0",
+  "ranged_weapon_damage": "0",
+  "STR": 10,
+  "CON": 10,
+  "POW": 10,
+  "DEX": 10,
+  "CHA": 10,
+  "INT": 10,
+  "SIZ": 10,
+  "EDU": 10,
+  "MOV": 10,
+  "magic": false,
+  "mutation": false,
+  "psychic": false,
+  "sorcery": false,
+  "superpower": false,
+  "SkillClass": RavenSkill,
+  "skills": {
+    "Artillery (various)": {
+      "name": "Artillery (various)",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Brawl": {
+      "name": "Brawl",
+      "category": "combat",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Energy Weapon (various)": {
+      "name": "Energy Weapon (various)",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Firearm (various)": {
+      "name": "Firearm (various)",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Grapple": {
+      "name": "Grapple",
+      "category": "combat",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Heavy Weapon (various)": {
+      "name": "Heavy Weapon (various)",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Martial Arts": {
+      "name": "Martial Arts",
+      "category": "combat",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Melee Weapon (various)": {
+      "name": "Melee Weapon (various)",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Missile Weapon (various)": {
+      "name": "Missile Weapon (various)",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Parry (various)": {
+      "name": "Parry (various)",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Shield": {
+      "name": "Shield",
+      "category": "combat",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Bargain": {
+      "name": "Bargain",
+      "category": "communication",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Command": {
+      "name": "Command",
+      "category": "communication",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Disguise": {
+      "name": "Disguise",
+      "category": "communication",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Etiquette (various)": {
+      "name": "Etiquette (various)",
+      "category": "communication",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Fast Talk": {
+      "name": "Fast Talk",
+      "category": "communication",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Language (various)": {
+      "name": "Language (own)",
+      "category": "communication",
+      "chance": 0,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Perform": {
+      "name": "Perform",
+      "category": "communication",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Persuade": {
+      "name": "Persuade",
+      "category": "communication",
+      "chance": 15,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Status": {
+      "name": "Status",
+      "category": "communication",
+      "chance": 15,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "Teach": {
+      "name": "Teach",
+      "category": "communication",
+      "chance": 10,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Art (various)": {
+      "name": "Art (various)",
+      "category": "manipulation",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Craft (various)": {
+      "name": "Craft (various)",
+      "category": "manipulation",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Demolition": {
+      "name": "Demolition",
+      "category": "manipulation",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Fine Manipulation": {
+      "name": "Fine Manipulation",
+      "category": "manipulation",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Heavy Machine (various)": {
+      "name": "Heavy Machine (various)",
+      "category": "manipulation",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Repair (various)": {
+      "name": "Repair (various)",
+      "category": "manipulation",
+      "chance": 15,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Sleight of Hand": {
+      "name": "Sleight of Hand",
+      "category": "manipulation",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Appraise": {
+      "name": "Appraise",
+      "category": "mental",
+      "chance": 15,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Blasphemous Lore": {
+      "name": "Blasphemous Lore",
+      "category": "mental",
+      "chance": 0,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "First Aid": {
+      "name": "First Aid",
+      "category": "mental",
+      "chance": 30,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Gaming": {
+      "name": "Language (own)",
+      "category": "communication",
+      "chance": 20,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Knowledge (various)": {
+      "name": "Knowledge (various)",
+      "category": "mental",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Literacy": {
+      "name": "Literacy",
+      "category": "mental",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Medicine": {
+      "name": "Medicine",
+      "category": "mental",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Psychotherapy": {
+      "name": "Psychotherapy",
+      "category": "mental",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Science (various)": {
+      "name": "Science (various)",
+      "category": "mental",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Strategy": {
+      "name": "Strategy",
+      "category": "mental",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Technical Skill (various)": {
+      "name": "Technical Skill (various)",
+      "category": "mental",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Insight": {
+      "name": "Insight",
+      "category": "perception",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Listen": {
+      "name": "Listen",
+      "category": "perception",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Navigate": {
+      "name": "Navigate",
+      "category": "perception",
+      "chance": 10,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Research": {
+      "name": "Research",
+      "category": "perception",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Sense": {
+      "name": "Sense",
+      "category": "perception",
+      "chance": 10,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Spot": {
+      "name": "Spot",
+      "category": "perception",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Track": {
+      "name": "Track",
+      "category": "perception",
+      "chance": 10,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Climb": {
+      "name": "Climb",
+      "category": "physical",
+      "chance": 40,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Dodge": {
+      "name": "Dodge",
+      "category": "physical",
+      "chance": 20,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Drive (various)": {
+      "name": "Drive (various)",
+      "category": "physical",
+      "chance": 20,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Fly": {
+      "name": "Fly",
+      "category": "physical",
+      "chance": 40,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Hide": {
+      "name": "Hide",
+      "category": "physical",
+      "chance": 10,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Jump": {
+      "name": "Jump",
+      "category": "physical",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Pilot (various)": {
+      "name": "Pilot (various)",
+      "category": "physical",
+      "chance": 1,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Projection": {
+      "name": "Projection",
+      "category": "physical",
+      "chance": 0,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Ride (various)": {
+      "name": "Ride (various)",
+      "category": "physical",
+      "chance": 5,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Stealth": {
+      "name": "Stealth",
+      "category": "physical",
+      "chance": 10,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Swim": {
+      "name": "Swim",
+      "category": "physical",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Throw": {
+      "name": "Throw",
+      "category": "physical",
+      "chance": 25,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Language (": {
+      "name": "Language (own)",
+      "category": "communication",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": true
+    },
+    "Effort": {
+      "name": "Effort",
+      "category": "",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "Stamina": {
+      "name": "Stamina",
+      "category": "",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "Idea": {
+      "name": "Idea",
+      "category": "",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "Luck": {
+      "name": "Luck",
+      "category": "",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "Agility": {
+      "name": "Agility",
+      "category": "",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "Charm": {
+      "name": "Charm",
+      "category": "",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    },
+    "Know": {
+      "name": "Know",
+      "category": "",
+      "chance": 50,
+      "experience_check": false,
+      "can_be_improved_through_experience": false
+    }
+  },
+  "new_skill_defaults": {},
+  "spells": [],
+  "mutations": [],
+  "psychic_powers": [],
+  "sorceries": [],
+  "superpowers": [],
+  "damage": 0,
+  "damage_location": {
+    "left_leg": 0,
+    "right_leg": 0,
+    "abdomen": 0,
+    "head": 0,
+    "left_arm": 0,
+    "right_arm": 0,
+    "chest": 0
+  },
+  "minor_wound": false,
+  "major_wound": false,
+  "fatal_wound": false,
+  "sanity": 50,
+  "recent_san_loss": 0,
+  "temporarily_insane": false,
+  "permanently_insane": false
+}
