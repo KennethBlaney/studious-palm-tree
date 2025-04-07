@@ -379,21 +379,21 @@ class BasicRoleplayCharacter:
         if my_success_int > their_success_int:
             return {"i_won": True,
                     "is_critical": my_success["critical"],
-                    "is_fail": my_success["is_fail"],
+                    "is_fail": my_success["failure"],
                     "is_fumble": my_success["fumble"]}
         if their_success_int > my_success_int:
             return {"i_won": False,
                     "is_critical": their_success["critical"],
-                    "is_fail": my_success["is_fail"],
+                    "is_fail": my_success["failure"],
                     "is_fumble": their_success["fumble"]}
         if i_win_ties is not None:
             return {"i_won": i_win_ties,
                     "is_critical": my_success["critical"],
-                    "is_fail": my_success["is_fail"],
+                    "is_fail": my_success["failure"],
                     "is_fumble": my_success["fumble"]}
         return {"i_won": self.skills[my_skill].chance >= opponent,
                 "is_critical": my_success["fumble"],
-                "is_fail": my_success["is_fail"],
+                "is_fail": my_success["failure"],
                 "is_fumble": my_success["fumble"]}
 
     def opposed_roll_subtraction(self,
@@ -445,7 +445,26 @@ class BasicRoleplayCharacter:
             opponent = opponent.chance // 5
         vs = self.skills[my_skill].chance // 5 - opponent
         chance = 50 + 5 * vs
-        return roll_d100() <= chance
+        roll = roll_d100()
+        total = roll
+        result = {
+            "fumble": False,
+            "failure": True,
+            "success": False,
+            "special": False,
+            "critical": False,
+            "roll": roll,
+            "total": total
+        }
+        if roll >= 100 - (100 - chance) // 20:
+            result["fumble"] = True
+        elif total <= 1 * chance:
+            result["failure"], result["success"] = False, True
+            if total <= -((1 * chance) // -5):
+                result["special"] = True
+                if total <= -((1 * chance) // -20):
+                    result["critical"] = True
+        return result
 
     def opposed_roll_resistance(self,
                                 opponent: Union[BasicRoleplaySkill, int] = 0,
@@ -460,12 +479,32 @@ class BasicRoleplayCharacter:
             opponent = opponent.chance
         vs = self.skills[my_skill].chance - opponent
         chance = 50 + vs
-        return roll_d100() <= chance
+
+        roll = roll_d100()
+        total = roll
+        result = {
+            "fumble": False,
+            "failure": True,
+            "success": False,
+            "special": False,
+            "critical": False,
+            "roll": roll,
+            "total": total
+        }
+        if roll >= 100 - (100 - chance) // 20:
+            result["fumble"] = True
+        elif total <= 1 * chance:
+            result["failure"], result["success"] = False, True
+            if total <= -((1 * chance) // -5):
+                result["special"] = True
+                if total <= -((1 * chance) // -20):
+                    result["critical"] = True
+        return result
 
     def opposed_pow_check(self,
                           opponent: Union[BasicRoleplaySkill, int] = 0) -> Dict[str, bool]:
         result = self.opposed_roll_resistance_table(opponent=opponent, my_skill="Luck")
-        if result["success"]:
+        if result:
             self.pow_improvement_check = True
         return result
 
@@ -579,7 +618,7 @@ class BasicRoleplayCharacter:
             self.sanity += int(amount)
         except ValueError:
             self.sanity += roll_str(amount)
-        self.sanity = min(self.sanity, 100 - self.skills["Blasphemous Lore"])
+        self.sanity = min(self.sanity, 100 - self.skills["Blasphemous Lore"].chance)
         self.temporarily_insane = False
 
     def modify_fatigue(self, amount: int = 0):
