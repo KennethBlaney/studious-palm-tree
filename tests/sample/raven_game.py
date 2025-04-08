@@ -37,6 +37,7 @@ class RavenSkill(BasicRoleplaySkill):
                                  advantage,
                                  lucky)
         result.update({"guilt": False})
+        return result
 
 
 @dataclass_json(undefined=Undefined.EXCLUDE)

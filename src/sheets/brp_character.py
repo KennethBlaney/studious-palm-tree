@@ -177,6 +177,7 @@ class BasicRoleplayCharacter:
     fatal_wound: bool = False
     sanity: int = 100
     recent_san_loss: int = 0
+    loss_history = []
     temporarily_insane: bool = False
     permanently_insane: bool = False
 
@@ -443,6 +444,8 @@ class BasicRoleplayCharacter:
         """
         if not isinstance(opponent, int):
             opponent = opponent.chance // 5
+        else:
+            opponent = opponent // 5
         vs = self.skills[my_skill].chance // 5 - opponent
         chance = 50 + 5 * vs
         roll = roll_d100()
@@ -454,15 +457,16 @@ class BasicRoleplayCharacter:
             "special": False,
             "critical": False,
             "roll": roll,
-            "total": total
+            "total": total,
+            "chance": chance
         }
-        if roll >= 100 - (100 - chance) // 20:
+        if roll >= min(100 - (100 - chance) // 20, 100):
             result["fumble"] = True
-        elif total <= 1 * chance:
+        elif total <= chance:
             result["failure"], result["success"] = False, True
-            if total <= -((1 * chance) // -5):
+            if total <= -(chance // -5):
                 result["special"] = True
-                if total <= -((1 * chance) // -20):
+                if total <= -(chance // -20):
                     result["critical"] = True
         return result
 
@@ -590,21 +594,25 @@ class BasicRoleplayCharacter:
         if target:
             self.damage_location[target] = max(0, self.damage_location[target] - amount)
 
-    def sanity_roll(self, loss_on_success: str = "0", loss_on_fail: str = "0"):
+    def sanity_roll(self, loss_on_success: str = "0", loss_on_fail: str = "0", loss_reason: str = "Default"):
         if roll_d100() <= self.sanity:
             try:
-                self.sanity -= int(loss_on_success)
-                self.recent_san_loss += int(loss_on_success)
+                loss = int(loss_on_success)
             except ValueError:
-                self.sanity -= roll_str(loss_on_success)
-                self.recent_san_loss += roll_str(loss_on_success)
+                loss = roll_str(loss_on_success)
         else:
             try:
-                self.sanity -= int(loss_on_fail)
-                self.recent_san_loss += int(loss_on_fail)
+                loss = int(loss_on_fail)
             except ValueError:
-                self.sanity -= roll_str(loss_on_fail)
-                self.recent_san_loss += roll_str(loss_on_fail)
+                loss = roll_str(loss_on_fail)
+
+        self.sanity = max(0, self.sanity - loss)
+        self.recent_san_loss += loss
+
+        # Log loss
+        if hasattr(self, "loss_history"):
+            self.loss_history.append({"amount": loss, "reason": loss_reason})
+
         if self.recent_san_loss >= self.temp_insanity_score:
             self.temporarily_insane = True
         if self.sanity <= 0:

@@ -43,7 +43,6 @@
   "psychic": false,
   "sorcery": false,
   "superpower": false,
-  "SkillClass": RavenSkill,
   "skills": {
     "Artillery (various)": {
       "name": "Artillery (various)",

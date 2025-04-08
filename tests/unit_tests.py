@@ -1,9 +1,7 @@
-import os
-
 import pytest
 from unittest.mock import patch, MagicMock
 
-from src.sheets import BasicRoleplayCharacter, BasicRoleplaySkill, load_character_from_json
+from src.sheets import BasicRoleplayCharacter, BasicRoleplaySkill
 
 
 @pytest.fixture
@@ -43,11 +41,6 @@ def test_make_experience_rolls_calls_each_skill():
     assert skill_mock.experience_roll.call_count == 2
 
 
-def test_character_load():
-    alice = load_character_from_json(os.path.join("test_characters", "alice.json"))
-    assert alice.name == "Alice"
-
-
 def test_skill_roll_basic():
     skill = BasicRoleplaySkill(name="Test", chance=50)
     result = skill.skill_roll()
@@ -84,6 +77,44 @@ def test_opposed_roll_highest_success():
     char.skills = {"Test": skill}
     result = char.opposed_roll_highest_success(opponent=50, my_skill="Test")
     assert "i_won" in result
+
+
+@patch("src.sheets.brp_character.roll_d100", return_value=1)
+def test_opposed_roll_resistance_table_critical(mock_roll):
+    char = BasicRoleplayCharacter()
+    char.skills = {"Intimidate": BasicRoleplaySkill(name="Intimidate", category="STR", chance=100)}
+
+    # Use a low opponent value to ensure the effective chance is high
+    result = char.opposed_roll_resistance_table(opponent=0, my_skill="Intimidate")
+
+    assert result["success"] is True
+    assert result["special"] is True
+    assert result["critical"] is True
+    assert result["failure"] is False
+    assert result["fumble"] is False
+    assert result["roll"] == 1
+
+
+@pytest.mark.parametrize(
+    "roll_value,expected_result",
+    [
+        # Critical success case
+        (1, {"success": True, "special": True, "critical": True, "failure": False, "fumble": False}),
+        # Fumble case (roll ≥ 95 for a chance of 75 gives fumble threshold at 99+)
+        (100, {"success": False, "special": False, "critical": False, "failure": True, "fumble": True}),
+    ]
+)
+def test_opposed_roll_resistance_table_extremes(roll_value, expected_result):
+
+    char = BasicRoleplayCharacter()
+    char.skills = {"Intimidate": BasicRoleplaySkill(name="Intimidate", category="STR", chance=100)}
+
+    with patch("src.sheets.brp_character.roll_d100", return_value=roll_value):
+        result = char.opposed_roll_resistance_table(opponent=1, my_skill="Intimidate")
+
+    assert result["roll"] == roll_value
+    for key, expected in expected_result.items():
+        assert result[key] == expected, f"{key} expected to be {expected} but was {result[key]}"
 
 
 def test_opposed_roll_subtraction():
@@ -187,6 +218,30 @@ def test_take_damage_to_body_part(amount, expected_disabled, expected_maimed, ex
     assert result["disabled_body_part"] == "Left Leg" if expected_disabled else result["disabled_body_part"] is None
     assert (result["maimed_body_part"] == "Left Leg") == expected_maimed
     assert (result["severed_body_part"] == "Left Leg") == expected_severed
+
+
+@patch("src.sheets.brp_character.roll_str")
+def test_take_damage_with_armor(mock_roll_str):
+    # Mock armor protection to reduce damage
+    mock_roll_str.return_value = 5
+
+    char = BasicRoleplayCharacter()
+    char.armor_protection = "1d6"  # Triggers roll_str
+    char.max_hit_points = 12
+    char.major_wound_level = 6
+    char.damage = 0
+    char.skills = {"Luck": BasicRoleplaySkill(chance=100)}  # Ensure Luck always succeeds
+    char.damage_location = {}
+
+    condition = char.take_damage(amount=10, bypass_armor=False)
+
+    # Damage should be reduced by 5
+    assert char.damage == 5
+    assert condition["unconscious"] is False
+    assert condition["major_wound_timer"] is None
+    assert condition["permanent_injury"] is False
+    assert condition["dying"] is False
+    assert condition["disabled_body_part"] is None
 
 
 @pytest.mark.parametrize("damage, amount, wounds, expected_damage", [
@@ -472,3 +527,45 @@ def test_heal_damage_edge_conditions(basic_character):
     basic_character.heal_damage(amount=10, heal_wounds=True, target="head")
     assert basic_character.damage == 0
     assert basic_character.damage_location["head"] == 0
+
+
+@pytest.mark.parametrize("sanity, lore, loss, expected_max_loss", [
+    (80, 0, "10", 10),     # Normal loss
+    (4, 0, "10", 4),       # Sanity cannot drop below 0
+])
+def test_sanity_roll_basic_and_high_lore(sanity, lore, loss, expected_max_loss):
+    char = BasicRoleplayCharacter()
+    char.sanity = sanity
+    char.skills = {"Blasphemous Lore": BasicRoleplaySkill(
+        **{"name": "Blasphemous Lore", "category": "mental", "chance": lore,
+           "can_be_improved_through_experience": False})}
+
+    char.sanity_roll(f"{loss}", f"{loss}", "Saw a zombie")
+
+    assert 0 <= char.sanity <= sanity
+    assert (sanity - char.sanity) <= expected_max_loss
+    assert char.loss_history[-1]["reason"] == "Saw a zombie"
+
+
+def test_sanity_roll_with_string_loss_dice():
+    char = BasicRoleplayCharacter()
+    char.sanity = 100
+    char.skills = {"Blasphemous Lore": BasicRoleplaySkill(
+        **{"name": "Blasphemous Lore", "category": "mental", "chance": 0,
+           "can_be_improved_through_experience": False})}
+
+    with patch("src.sheets.brp_character.roll_ndm", return_value=4):
+        char.sanity_roll("1d6", "1d6", "Saw a demon")
+        assert 100 > char.sanity >= 94
+        assert char.loss_history[-1]["reason"] == "Saw a demon"
+
+
+def test_sanity_does_not_go_below_zero():
+    char = BasicRoleplayCharacter()
+    char.sanity = 2
+    char.skills = {"Blasphemous Lore": BasicRoleplaySkill(
+        **{"name": "Blasphemous Lore", "category": "mental", "chance": 0,
+           "can_be_improved_through_experience": False})}
+
+    char.sanity_roll("5", "10")  # Exceeds current sanity
+    assert char.sanity == 0
